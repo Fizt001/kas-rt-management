@@ -1,0 +1,172 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex flex-col">
+            <h2 class="text-xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">
+                Laporan <span class="text-rose-600">Penggunaan Dana</span>
+            </h2>
+            <p class="text-[11px] text-slate-500 font-medium uppercase tracking-wider italic">Realisasi Anggaran & Bukti Kegiatan RT</p>
+        </div>
+    </x-slot>
+
+    @php
+        $role = strtolower(str_replace(' ', '', auth()->user()->role));
+        $canEdit = in_array($role, ['rt', 'superadmin']);
+        $canView = in_array($role, ['rt', 'bendahara', 'superadmin']);
+    @endphp
+
+    <div x-data="{ 
+        showModalFoto: false,
+        showModalNota: false,
+        showModalPreview: false,
+        actionUrl: '',
+        agendaName: '',
+        previewUrl: '',
+        previewTitle: '',
+        currentNominal: 0,
+        
+        openFotoModal(id, name) {
+            this.actionUrl = `/expenditures/foto/${id}`;
+            this.agendaName = name;
+            this.showModalFoto = true;
+        },
+
+        openNotaModal(id, name, nominal) {
+            this.actionUrl = `/expenditures/nota/${id}`;
+            this.agendaName = name;
+            this.currentNominal = nominal;
+            this.showModalNota = true;
+        },
+
+        openPreview(url, title) {
+            this.previewUrl = url;
+            this.previewTitle = title;
+            this.showModalPreview = true;
+        }
+    }" class="p-4 sm:p-5 max-w-7xl mx-auto space-y-4 md:space-y-5">
+
+        <div class="bg-blue-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-blue-100 dark:border-slate-700 flex items-start gap-3">
+            <svg class="size-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p class="text-xs text-blue-800 dark:text-slate-300 font-medium leading-relaxed">
+                Bendahara & RT dapat melihat bukti kegiatan. Khusus <strong>RT</strong> dapat mengunggah atau mengubah data laporan setelah kegiatan terlaksana.
+            </p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
+            <div class="space-y-4">
+                @forelse($agendas as $agenda)
+                    @php
+                        $tanggalAcara = \Carbon\Carbon::parse($agenda->tanggal);
+                        $isLocked = $tanggalAcara->startOfDay()->isFuture(); 
+                    @endphp
+
+                    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-2xl border {{ $isLocked ? 'border-dashed border-slate-200' : 'border-slate-100 bg-slate-50/50' }}">
+                        
+                        <div class="flex-1 w-full">
+                            <h4 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">{{ $agenda->judul }}</h4>
+                            <span class="text-[10px] font-bold text-slate-500">{{ $tanggalAcara->translatedFormat('d F Y') }}</span>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+                            <div class="flex flex-col sm:items-end min-w-[120px]">
+                                <p class="text-[9px] font-black text-slate-400 uppercase">Dana Terpakai</p>
+                                <p class="text-sm font-black text-rose-600">Rp{{ number_format($agenda->realisasi_dana ?? 0, 0, ',', '.') }}</p>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button type="button" 
+                                    @if($agenda->bukti_kegiatan) @click="openPreview('{{ asset('storage/' . $agenda->bukti_kegiatan) }}', 'Foto Kegiatan: {{ $agenda->judul }}')" @endif
+                                    class="flex flex-col items-center group">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center transition-all {{ $agenda->bukti_kegiatan ? 'bg-emerald-500 text-white shadow-lg cursor-pointer hover:scale-110' : 'bg-slate-200 text-slate-400' }}">
+                                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </div>
+                                    <span class="text-[7px] font-black text-slate-400 mt-1 uppercase">Foto</span>
+                                </button>
+
+                                <button type="button" 
+                                    @if($agenda->nota_belanja) @click="openPreview('{{ asset('storage/' . $agenda->nota_belanja) }}', 'Nota Belanja: {{ $agenda->judul }}')" @endif
+                                    class="flex flex-col items-center group">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center transition-all {{ $agenda->nota_belanja ? 'bg-blue-500 text-white shadow-lg cursor-pointer hover:scale-110' : 'bg-slate-200 text-slate-400' }}">
+                                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                    <span class="text-[7px] font-black text-slate-400 mt-1 uppercase">Nota</span>
+                                </button>
+                            </div>
+
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                @if(!$isLocked && $canEdit)
+                                    <button @click="openFotoModal('{{ $agenda->id }}', '{{ $agenda->judul }}')" class="flex-1 px-3 py-2 bg-emerald-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest">Update Foto</button>
+                                    <button @click="openNotaModal('{{ $agenda->id }}', '{{ $agenda->judul }}', '{{ $agenda->realisasi_dana }}')" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest">Update Nota</button>
+                                @elseif($isLocked)
+                                    <span class="px-4 py-2 bg-slate-100 text-slate-400 rounded-xl text-[9px] font-black uppercase italic">Belum Terlaksana</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-10"><p class="text-xs font-bold text-slate-400 italic uppercase">Data Kosong</p></div>
+                @endforelse
+            </div>
+        </div>
+
+        <div x-show="showModalPreview" style="display: none;" class="fixed inset-0 z-[150] overflow-y-auto" x-cloak>
+            <div class="fixed inset-0 bg-slate-900/90 backdrop-blur-md" @click="showModalPreview = false"></div>
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl">
+                    <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                        <h3 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight" x-text="previewTitle"></h3>
+                        <button @click="showModalPreview = false" class="text-slate-400 hover:text-rose-500 transition-colors">
+                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    <div class="p-2 bg-slate-100 dark:bg-slate-800 flex justify-center">
+                        <img :src="previewUrl" class="max-h-[70vh] rounded-xl object-contain shadow-lg">
+                    </div>
+                    <div class="p-4 text-center">
+                        <a :href="previewUrl" download class="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Unduh Gambar Asli</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="showModalFoto" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalFoto = false"></div>
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200">
+                    <h3 class="text-lg font-black text-slate-800 dark:text-white italic mb-1 uppercase">Upload <span class="text-emerald-500">Foto</span></h3>
+                    <p class="text-[10px] font-bold text-slate-400 mb-5" x-text="agendaName"></p>
+                    <form :action="actionUrl" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        @csrf
+                        <input type="file" name="bukti_kegiatan" accept="image/*" required class="w-full text-xs font-bold file:bg-emerald-500 file:text-white file:rounded-full file:border-0 file:px-4 file:py-2">
+                        <div class="flex gap-2 pt-2">
+                            <button type="button" @click="showModalFoto = false" class="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[10px] uppercase">Batal</button>
+                            <button type="submit" class="flex-[2] py-3 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase shadow-lg shadow-emerald-200">Simpan Foto</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="showModalNota" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalNota = false"></div>
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200">
+                    <h3 class="text-lg font-black text-slate-800 dark:text-white italic mb-1 uppercase">Input <span class="text-blue-600">Nota & Dana</span></h3>
+                    <p class="text-[10px] font-bold text-slate-400 mb-5" x-text="agendaName"></p>
+                    <form :action="actionUrl" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        @csrf
+                        <div class="bg-rose-50 p-4 rounded-2xl">
+                            <label class="text-[10px] font-black text-rose-600 uppercase mb-1.5 block">Total Dana Terpakai (Rp)</label>
+                            <input type="number" name="realisasi_dana" x-model="currentNominal" required class="w-full border-none rounded-xl py-2 px-4 font-black text-sm">
+                        </div>
+                        <input type="file" name="nota_belanja" accept="image/*" class="w-full text-xs font-bold file:bg-blue-600 file:text-white file:rounded-full file:border-0 file:px-4 file:py-2">
+                        <div class="flex gap-2 pt-2">
+                            <button type="button" @click="showModalNota = false" class="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[10px] uppercase">Batal</button>
+                            <button type="submit" class="flex-[2] py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase shadow-lg shadow-blue-200">Simpan Nota</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</x-app-layout>

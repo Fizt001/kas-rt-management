@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   REVISI KAS-RT DIGITAL
+   ==========================================================================
+   - Menghapus plugin Preline karena tidak lagi digunakan.
+   - Menambahkan utilitas untuk scrollbar sidebar desktop.
+   ==========================================================================
+*/
+
+/* Custom Scrollbar untuk Sidebar agar tetap estetik di mode Desktop */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1e293b; /* Warna Slate 800 */
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #334155; /* Warna Slate 700 */
+}
+
+/* Mencegah elemen Alpine.js (seperti sidebar mobile) berkedip saat page load */
+[x-cloak] { 
+    display: none !important; 
+}
