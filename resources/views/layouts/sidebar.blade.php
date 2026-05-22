@@ -3,32 +3,32 @@
         function active($route) {
             return request()->routeIs($route)
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-white';
+                : 'text-slate-600 hover:bg-slate-200 hover:text-blue-700';
         }
     }
     $role = strtolower(str_replace(' ', '', auth()->user()->role ?? 'warga'));
 @endphp
 
 {{-- BAGIAN 1: HEADER LOGO (Tetap di Atas) --}}
-<div class="px-6 h-16 flex items-center shrink-0 border-b border-slate-800 bg-slate-950 transition-all duration-300" :class="sidebarMini ? 'justify-center px-2' : 'justify-between lg:justify-start'">
+<div class="px-6 h-16 flex items-center shrink-0 border-b border-slate-200 bg-slate-100 transition-all duration-300" :class="sidebarMini ? 'justify-center px-2' : 'justify-between lg:justify-start'">
     <div class="flex flex-col overflow-hidden" x-show="!sidebarMini" x-transition.opacity>
-        <span class="text-xl font-black text-blue-500 uppercase tracking-tighter">KAS-RT</span>
+        <span class="text-xl font-black text-blue-600 uppercase tracking-tighter">KAS-RT</span>
         <p class="text-[9px] text-slate-500 font-bold tracking-[0.2em] uppercase mt-0.5">Management</p>
     </div>
     
     <div class="flex items-center" :class="sidebarMini ? '' : 'ml-auto'">
-        <button @click="sidebarMini = !sidebarMini" class="hidden lg:block p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-300" :class="sidebarMini ? 'rotate-180' : ''">
+        <button @click="sidebarMini = !sidebarMini" class="hidden lg:block p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-200 rounded-lg transition-all duration-300" :class="sidebarMini ? 'rotate-180' : ''">
             <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
         </button>
     </div>
 
-    <button @click="sidebarOpen = false" class="lg:hidden p-2 text-slate-400 hover:text-white" x-show="!sidebarMini">
+    <button @click="sidebarOpen = false" class="lg:hidden p-2 text-slate-400 hover:text-blue-600" x-show="!sidebarMini">
         <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
     </button>
 </div>
 
 {{-- BAGIAN 2: MENU NAVIGASI (Hanya ini yang bisa scroll) --}}
-<nav class="flex-1 h-0 overflow-y-auto custom-scrollbar bg-slate-950 py-6 transition-all duration-300" :class="sidebarMini ? 'px-2' : 'px-4'">
+<nav class="flex-1 h-0 overflow-y-auto custom-scrollbar bg-slate-100 py-6 transition-all duration-300" :class="sidebarMini ? 'px-2' : 'px-4'">
         <ul role="list" class="flex flex-col gap-y-7">
             <li>
                 <ul role="list" class="space-y-1">
@@ -61,7 +61,7 @@
 
                     {{-- ================= PENGURUS MESJID ================= --}}
                     @if(in_array($role, ['mesjid', 'superadmin']))
-                        <li class="pt-6 pb-1 font-bold text-[10px] text-emerald-600 uppercase tracking-widest border-t border-slate-800 mt-4" :class="sidebarMini ? 'text-center pl-0' : 'pl-4'"><span x-show="!sidebarMini">Pengurus Mesjid</span><span x-show="sidebarMini">...</span></li>
+                        <li class="pt-6 pb-1 font-bold text-[10px] text-emerald-600 uppercase tracking-widest border-t border-slate-200 mt-4" :class="sidebarMini ? 'text-center pl-0' : 'pl-4'"><span x-show="!sidebarMini">Pengurus Mesjid</span><span x-show="sidebarMini">...</span></li>
                         <li><a href="{{ route('mesjid.payment') }}" :title="sidebarMini ? 'Metode Bayar' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('mesjid.payment') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">🕌</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Metode Bayar</span></a></li>
                         <li><a href="{{ route('mesjid.pengeluaran') }}" :title="sidebarMini ? 'Penggunaan Dana' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('mesjid.pengeluaran') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">💸</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Penggunaan Dana</span></a></li>
                         <li><a href="{{ route('mesjid.laporan') }}" :title="sidebarMini ? 'Laporan Kas' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('mesjid.laporan') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">📑</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Laporan Kas</span></a></li>
@@ -69,7 +69,7 @@
 
                     {{-- ================= PENGURUS KOPERASI ================= --}}
                     @if(in_array($role, ['koperasi', 'superadmin']))
-                        <li class="pt-6 pb-1 font-bold text-[10px] text-amber-500 uppercase tracking-widest border-t border-slate-800 mt-4" :class="sidebarMini ? 'text-center pl-0' : 'pl-4'"><span x-show="!sidebarMini">Pengurus Koperasi</span><span x-show="sidebarMini">...</span></li>
+                        <li class="pt-6 pb-1 font-bold text-[10px] text-amber-600 uppercase tracking-widest border-t border-slate-200 mt-4" :class="sidebarMini ? 'text-center pl-0' : 'pl-4'"><span x-show="!sidebarMini">Pengurus Koperasi</span><span x-show="sidebarMini">...</span></li>
                         <li><a href="{{ route('koperasi.admin.payment') }}" :title="sidebarMini ? 'Metode Bayar' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('koperasi.admin.payment') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">💰</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Metode Bayar</span></a></li>
                         <li><a href="{{ route('koperasi.admin.anggota') }}" :title="sidebarMini ? 'Data Anggota' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('koperasi.admin.anggota') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">👥</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Data Anggota</span></a></li>
                         <li><a href="{{ route('koperasi.admin.transaksi') }}" :title="sidebarMini ? 'Data Transaksi' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('koperasi.admin.transaksi') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">💸</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Data Transaksi</span></a></li>
@@ -79,7 +79,8 @@
 
                     {{-- ================= LAYANAN WARGA ================= --}}
                     @if(in_array($role, ['warga', 'superadmin']))
-                        <li class="pt-6 pb-1 font-bold text-[10px] text-slate-500 uppercase tracking-widest border-t border-slate-800 mt-4" :class="sidebarMini ? 'text-center pl-0' : 'pl-4'"><span x-show="!sidebarMini">Layanan Warga</span><span x-show="sidebarMini">...</span></li>
+                        <li class="pt-6 pb-1 font-bold text-[10px] text-slate-500 uppercase tracking-widest border-t border-slate-200 mt-4" :class="sidebarMini ? 'text-center pl-0' : 'pl-4'"><span x-show="!sidebarMini">Layanan Warga</span><span x-show="sidebarMini">...</span></li>
+                        <li><a href="{{ route('warga.profile') }}" :title="sidebarMini ? 'Data Keluarga' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('warga.profile') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">👨‍👩‍👧‍👦</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Data Keluarga</span></a></li>
                         <li><a href="{{ route('warga.iuran') }}" :title="sidebarMini ? 'Iuran & Bayar' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('warga.iuran') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">💵</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Iuran & Bayar</span></a></li>
                         <li><a href="{{ route('warga.infaq') }}" :title="sidebarMini ? 'Tunaikan Infaq' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('warga.infaq') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">🤲</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Tunaikan Infaq</span></a></li>
                         <li><a href="{{ route('warga.agendas') }}" :title="sidebarMini ? 'Kegiatan RT' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('warga.agendas') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">📅</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Kegiatan RT</span></a></li>
@@ -91,7 +92,7 @@
     </nav>
 
 {{-- BAGIAN 3: FOOTER LOGOUT (Tetap di Bawah) --}}
-<div class="p-4 border-t border-slate-800 bg-slate-950 shrink-0 transition-all duration-300">
+<div class="p-4 border-t border-slate-200 bg-slate-100 shrink-0 transition-all duration-300">
     <form method="POST" action="{{ route('logout') }}">
         @csrf
         <button type="submit" :title="sidebarMini ? 'Keluar Aplikasi' : ''" class="group flex items-center rounded-xl p-3 text-sm font-bold text-rose-400 hover:bg-rose-500/10 w-full text-left transition-all shadow-sm" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'">

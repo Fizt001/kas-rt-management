@@ -125,6 +125,10 @@ class UserController extends Controller
             'nama' => 'required|string|max:255',
             'status_hubungan' => 'required|string',
             'nik' => 'nullable|string|max:20',
+            'kelompok_kk_select' => 'required|string|max:255',
+            'kelompok_kk_new' => 'nullable|string|max:255',
+            'no_kk_kelompok' => 'nullable|string|max:30',
+            'tanggal_lahir' => 'nullable|date',
             'target_user_id' => 'required|exists:users,id'
         ]);
 
@@ -132,11 +136,16 @@ class UserController extends Controller
             abort(403);
         }
 
+        $kelompokKk = $request->kelompok_kk_select === 'NEW' ? $request->kelompok_kk_new : $request->kelompok_kk_select;
+
         \App\Models\FamilyMember::create([
             'user_id'         => $request->target_user_id,
             'nama'            => $request->nama,
             'status_hubungan' => $request->status_hubungan,
             'nik'             => $request->nik,
+            'kelompok_kk'     => $kelompokKk ?: 'KK Utama',
+            'no_kk_kelompok'  => $request->no_kk_kelompok,
+            'tanggal_lahir'   => $request->tanggal_lahir,
         ]);
 
         return back()->with('success', 'Anggota Keluarga berhasil ditambahkan!');
@@ -162,6 +171,10 @@ class UserController extends Controller
             'nama' => 'required|string|max:255',
             'status_hubungan' => 'required|string',
             'nik' => 'nullable|string|max:20',
+            'kelompok_kk_select' => 'required|string|max:255',
+            'kelompok_kk_new' => 'nullable|string|max:255',
+            'no_kk_kelompok' => 'nullable|string|max:30',
+            'tanggal_lahir' => 'nullable|date',
         ]);
 
         $family = \App\Models\FamilyMember::findOrFail($id);
@@ -171,10 +184,15 @@ class UserController extends Controller
             abort(403);
         }
 
+        $kelompokKk = $request->kelompok_kk_select === 'NEW' ? $request->kelompok_kk_new : $request->kelompok_kk_select;
+
         $family->update([
             'nama'            => $request->nama,
             'status_hubungan' => $request->status_hubungan,
             'nik'             => $request->nik,
+            'kelompok_kk'     => $kelompokKk ?: 'KK Utama',
+            'no_kk_kelompok'  => $request->no_kk_kelompok,
+            'tanggal_lahir'   => $request->tanggal_lahir,
         ]);
 
         return back()->with('success', 'Data Anggota Keluarga berhasil diperbarui!');
@@ -188,6 +206,7 @@ class UserController extends Controller
             'no_rumah'       => 'nullable|string|max:50',
             'no_kk'          => 'nullable|string|max:30',
             'nik'            => 'nullable|string|max:30',
+            'tanggal_lahir'  => 'nullable|date',
         ]);
 
         // 2. Cek Otorisasi: warga hanya boleh update profil dirinya sendiri
@@ -204,6 +223,7 @@ class UserController extends Controller
             'no_rumah' => strtoupper($request->no_rumah), // Biar otomatis huruf kapital
             'no_kk'    => $request->no_kk,
             'nik'      => $request->nik,
+            'tanggal_lahir' => $request->tanggal_lahir,
         ]);
 
         return back()->with('success', 'Data Identitas Keluarga Berhasil Diperbarui!');

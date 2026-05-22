@@ -18,14 +18,14 @@
          x-transition:leave="transition ease-in-out duration-300 transform" 
          x-transition:leave-start="translate-x-0" 
          x-transition:leave-end="-translate-x-full" 
-         class="fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-slate-950 lg:hidden" x-cloak>
+         class="fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-slate-100 shadow-2xl lg:hidden" x-cloak>
         @include('layouts.sidebar')
     </div>
 
     {{-- DESKTOP SIDEBAR (FIXED & NO SCROLL PADA WRAPPER) --}}
     <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col transition-all duration-300 ease-in-out" :class="sidebarMini ? 'lg:w-20' : 'lg:w-64'">
         {{-- Pastikan h-full dan overflow-hidden agar pembungkus tidak ikut scroll --}}
-        <div class="flex flex-col h-full overflow-hidden border-r border-slate-800 bg-slate-950">
+        <div class="flex flex-col h-full overflow-hidden border-r border-slate-200 bg-slate-100 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
             @include('layouts.sidebar')
         </div>
     </div>
