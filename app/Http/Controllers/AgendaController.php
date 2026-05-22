@@ -25,6 +25,24 @@ class AgendaController extends Controller
     }
 
     /**
+     * Menampilkan daftar agenda untuk warga (read-only).
+     */
+    public function wargaIndex()
+    {
+        // Pisahkan agenda yang akan datang/aktif dan yang sudah selesai
+        $agendasAktif = Agenda::where('status', 'aktif')
+            ->orderBy('tanggal', 'asc')
+            ->get();
+            
+        $agendasSelesai = Agenda::where('status', 'selesai')
+            ->orderBy('tanggal', 'desc')
+            ->take(5) // Tampilkan 5 terakhir saja untuk riwayat
+            ->get();
+
+        return view('warga.agendas.index', compact('agendasAktif', 'agendasSelesai'));
+    }
+
+    /**
      * Update status agenda (Selesai).
      */
     public function updateStatus(Request $request, $id)
@@ -97,7 +115,8 @@ class AgendaController extends Controller
         ]);
 
         $agenda = Agenda::findOrFail($id);
-        $agenda->update($request->all());
+        // Gunakan only() bukan all() agar tidak ada field asing yang masuk
+        $agenda->update($request->only(['judul', 'deskripsi', 'tanggal', 'waktu', 'lokasi', 'status']));
 
         return back()->with('success', 'Data agenda diperbarui!');
     }

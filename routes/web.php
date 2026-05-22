@@ -13,10 +13,15 @@ use App\Http\Controllers\InfaqController;
 use App\Http\Controllers\MesjidPaymentController;
 use App\Http\Controllers\MesjidExpenditureController;
 use App\Http\Controllers\MesjidLaporanController;
+use App\Http\Controllers\MesjidDashboardController;
 use App\Http\Controllers\KoperasiController;
 use App\Http\Controllers\KoperasiPaymentController;
 use App\Http\Controllers\KoperasiWargaController;
 use App\Http\Controllers\KoperasiLaporanController;
+use App\Http\Controllers\KoperasiDashboardController;
+use App\Http\Controllers\RtDashboardController;
+use App\Http\Controllers\BendaharaDashboardController;
+use App\Http\Controllers\WargaDashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,24 +41,24 @@ Route::get('/', function ()
 Route::get('/dashboard', function () {
     $role = auth()->user()->role;
     
-    if ($role === 'rt' || request()->routeIs('rt.dashboard')) {
-        return app(\App\Http\Controllers\RtDashboardController::class)->index();
+    if ($role === 'rt') {
+        return app(RtDashboardController::class)->index();
     }
 
-    if ($role === 'bendahara' || request()->routeIs('bendahara.dashboard')) {
-        return app(\App\Http\Controllers\BendaharaDashboardController::class)->index();
+    if ($role === 'bendahara') {
+        return app(BendaharaDashboardController::class)->index();
     }
 
-    if ($role === 'warga' || request()->routeIs('warga.dashboard')) {
-        return app(\App\Http\Controllers\WargaDashboardController::class)->index();
+    if ($role === 'warga') {
+        return app(WargaDashboardController::class)->index();
     }
             
-    if ($role === 'mesjid' || request()->routeIs('mesjid.dashboard')) {
-        return app(\App\Http\Controllers\MesjidDashboardController::class)->index();
+    if ($role === 'mesjid') {
+        return app(MesjidDashboardController::class)->index();
     }
 
-    if ($role === 'koperasi' || request()->routeIs('koperasi.admin.*')) {
-        return app(\App\Http\Controllers\KoperasiDashboardController::class)->index();
+    if ($role === 'koperasi') {
+        return app(KoperasiDashboardController::class)->index();
     }
 
     if (view()->exists($role . '.dashboard')) {
@@ -107,6 +112,8 @@ Route::middleware(['auth', 'role:warga,superadmin'])->group(function () {
     Route::post('/my-family/update-anggota/{id}', [UserController::class, 'updateFamily'])->name('warga.family.update');
     Route::delete('/my-family/delete/{id}', [UserController::class, 'destroyFamily'])->name('warga.family.destroy');
 
+    Route::get('/kegiatan-rt', [AgendaController::class, 'wargaIndex'])->name('warga.agendas');
+
     Route::get('/transparansi/dana', [ExpenditureController::class, 'wargaIndex'])->name('warga.transparansi');
     
     Route::get('/infaq-saya', [InfaqController::class, 'index'])->name('warga.infaq');
@@ -117,7 +124,8 @@ Route::middleware(['auth', 'role:warga,superadmin'])->group(function () {
     Route::post('/koperasi/saya/setor', [KoperasiWargaController::class, 'store'])->name('warga.koperasi.store');
     Route::post('/koperasi/saya/tarik', [KoperasiWargaController::class, 'tarikDana'])->name('warga.koperasi.tarik');
     Route::post('/koperasi/saya/pinjam', [KoperasiWargaController::class, 'ajukanPinjaman'])->name('warga.koperasi.pinjam');
-    Route::post('/koperasi/saya/cicilan/{id}', [KoperasiWargaController::class, 'bayarCicilan'])->name('warga.koperasi.bayar_cicilan');
+    Route::post('/koperasi/saya/cicilan/{id}', [KoperasiWargaController::class, 'bayarCicilan'])->name('warga.koperasi.cicilan');
+    Route::post('/koperasi/saya/cicilan-saldo/{id}', [KoperasiWargaController::class, 'bayarCicilanPakaiSaldo'])->name('warga.koperasi.cicilan.saldo');
 });
 
 // 5. GRUP AKSES PENGURUS MESJID (Mesjid & Superadmin)
@@ -127,8 +135,9 @@ Route::middleware(['auth', 'role:mesjid,superadmin'])->group(function () {
     Route::post('/mesjid/payment', [MesjidPaymentController::class, 'store'])->name('mesjid.payment.store');
     Route::get('/mesjid/pengeluaran', [MesjidExpenditureController::class, 'index'])->name('mesjid.pengeluaran');
     Route::post('/mesjid/pengeluaran', [MesjidExpenditureController::class, 'store'])->name('mesjid.pengeluaran.store');
-    Route::delete('/mesjid/pengeluaran/{id}', [MesjidExpenditureController::class, 'destroy'])->name('mesjid.pengeluaran.destroy');});
+    Route::delete('/mesjid/pengeluaran/{id}', [MesjidExpenditureController::class, 'destroy'])->name('mesjid.pengeluaran.destroy');
     Route::get('/mesjid/laporan', [MesjidLaporanController::class, 'index'])->name('mesjid.laporan');
+});
 
 // 6. GRUP AKSES KOPERASI (Koperasi & Superadmin)
 Route::middleware(['auth', 'role:koperasi,superadmin'])->group(function () {

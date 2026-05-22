@@ -33,14 +33,11 @@ class KasController extends Controller
         ];
 
         foreach ($namaBulan as $num => $nama) {
-            // Pemasukan per bulan (berdasarkan kolom bulan & tahun di billings)
+            // Pemasukan per bulan (bulan sudah integer, query langsung)
             $masuk = Billing::where('status', 'lunas')
                 ->where('tahun', $tahunIni)
-                ->where(function($q) use ($nama, $num) {
-                    $q->where('bulan', $nama)
-                      ->orWhere('bulan', str_pad($num, 2, '0', STR_PAD_LEFT))
-                      ->orWhere('bulan', $num);
-                })->sum('total_amount') ?? 0;
+                ->where('bulan', $num)
+                ->sum('total_amount') ?? 0;
 
             // Pengeluaran per bulan (berdasarkan tanggal acara di agendas)
             $keluar = Agenda::whereYear('tanggal', $tahunIni)

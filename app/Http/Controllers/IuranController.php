@@ -44,7 +44,8 @@ class IuranController extends Controller
         ]);
 
         $iuran = IuranMaster::findOrFail($id);
-        $iuran->update($request->all());
+        // Gunakan only() bukan all() agar tidak ada field asing yang masuk
+        $iuran->update($request->only(['nama_iuran', 'nominal', 'deskripsi', 'is_active']));
 
         return back()->with('success', 'Jenis iuran berhasil diperbarui!');
     }
@@ -71,8 +72,9 @@ class IuranController extends Controller
         // Langsung jumlahkan semua nominal iuran yang aktif
         $totalNominal = $iuranAktif->sum('nominal'); 
 
-        $bulanSelected = $request->bulan ?? Carbon::now()->translatedFormat('F');
-        $tahunSelected = $request->tahun ?? Carbon::now()->year;
+        // Standardisasi: simpan bulan sebagai INTEGER (1-12) dan tahun sebagai integer
+        $bulanSelected = (int) ($request->bulan ?? Carbon::now()->month);
+        $tahunSelected = (int) ($request->tahun ?? Carbon::now()->year);
         
         $count = 0;
 
@@ -100,7 +102,9 @@ class IuranController extends Controller
     
     public function wargaIndex(\Illuminate\Http\Request $request)
     {
-        $tahun = $request->tahun ?? date('Y');
+        // Standardisasi: bulan selalu integer (1-12)
+        $tahun = (int) ($request->tahun ?? date('Y'));
+        $bulan = (int) ($request->bulan ?? date('n'));
         $currentUser = auth()->user();
 
         // 1. Cek apakah user punya hak akses pantau (Admin/RT/Bendahara)
@@ -197,24 +201,28 @@ class IuranController extends Controller
         $tagihan = \App\Models\Billing::findOrFail($id); 
 
         $user = \Illuminate\Support\Facades\Auth::user();
-        $akunKoperasi = \App\Models\KoperasiAccount::where('user_id', $user->id)->first();
-
-        // 2. Validasi: Apakah warga punya akun koperasi dan saldo sukarelanya cukup?
-        // Ingat, kita hanya pakai Saldo Sukarela untuk bayar Iuran RT
-        if (!$akunKoperasi || $akunKoperasi->saldo_sukarela < $tagihan->total_amount) {
-            return back()->with('error', 'Saldo Sukarela Koperasi Anda tidak mencukupi untuk membayar tagihan ini. (Dibutuhkan: Rp ' . number_format($tagihan->total_amount, 0, ',', '.') . ')');
-        }
 
         try {
             \Illuminate\Support\Facades\DB::beginTransaction();
 
-            // 3. Potong Saldo Sukarela Koperasi
+            // 2. Lock baris saldo agar request bersamaan tidak bisa lolos validasi sekaligus
+            $akunKoperasi = \App\Models\KoperasiAccount::where('user_id', $user->id)
+                ->lockForUpdate()
+                ->first();
+
+            // 3. Validasi: Apakah warga punya akun koperasi dan saldo sukarelanya cukup?
+            if (!$akunKoperasi || $akunKoperasi->saldo_sukarela < $tagihan->total_amount) {
+                \Illuminate\Support\Facades\DB::rollBack();
+                return back()->with('error', 'Saldo Sukarela Koperasi Anda tidak mencukupi untuk membayar tagihan ini. (Dibutuhkan: Rp ' . number_format($tagihan->total_amount, 0, ',', '.') . ')');
+            }
+
+            // 4. Potong Saldo Sukarela Koperasi
             $akunKoperasi->saldo_sukarela -= $tagihan->total_amount;
             // Update total saldo secara akurat
             $akunKoperasi->total_saldo = $akunKoperasi->saldo_pokok + $akunKoperasi->saldo_wajib + $akunKoperasi->saldo_sukarela;
             $akunKoperasi->save();
 
-            // 4. Catat Mutasi Keluar di Buku Koperasi (Otomatis Approved)
+            // 5. Catat Mutasi Keluar di Buku Koperasi (Otomatis Approved)
             \App\Models\KoperasiTransaction::create([
                 'user_id'        => $user->id,
                 'type'           => 'penarikan',
@@ -224,7 +232,7 @@ class IuranController extends Controller
                 'status'         => 'approved',
             ]);
 
-            // 5. Update Status Tagihan (Billing) menjadi LUNAS seketika
+            // 6. Update Status Tagihan (Billing) menjadi LUNAS seketika
             $tagihan->update([
                 'status'         => 'lunas', 
                 'verified_at'    => now(),

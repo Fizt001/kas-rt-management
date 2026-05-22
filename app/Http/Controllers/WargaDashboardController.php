@@ -16,12 +16,11 @@ class WargaDashboardController extends Controller
         $user = Auth::user();
         $now = Carbon::now();
 
-        // 1. Status Iuran Bulan Ini
+        // 1. Status Iuran Bulan Ini (bulan sudah integer)
         $statusBulanIni = Billing::where('user_id', $user->id)
             ->where('tahun', $now->year)
-            ->where(function($q) use ($now) {
-                $q->where('bulan', $now->month)->orWhere('bulan', $now->format('m'));
-            })->first();
+            ->where('bulan', $now->month)
+            ->first();
 
         // 2. Data Grafik: Transparansi & Riwayat (6 Bulan Terakhir)
         $labelBulan = [];
@@ -32,13 +31,12 @@ class WargaDashboardController extends Controller
             $date = Carbon::now()->subMonths($i);
             $labelBulan[] = $date->translatedFormat('M');
 
-            // Nominal yang saya bayar di bulan ini
+            // Nominal yang saya bayar di bulan ini (bulan sudah integer)
             $bayar = Billing::where('user_id', $user->id)
                 ->where('status', 'lunas')
                 ->where('tahun', $date->year)
-                ->where(function($q) use ($date) {
-                    $q->where('bulan', $date->month)->orWhere('bulan', $date->format('m'));
-                })->sum('total_amount');
+                ->where('bulan', $date->month)
+                ->sum('total_amount');
             
             // Total pengeluaran RT di bulan ini (Transparansi)
             $pengeluaran = Agenda::whereYear('tanggal', $date->year)

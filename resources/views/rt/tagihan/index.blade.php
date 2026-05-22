@@ -20,8 +20,8 @@
 
             <form action="{{ route('tagihan.warga') }}" method="GET" class="flex gap-2 w-full md:w-auto">
                 <select name="bulan" onchange="this.form.submit()" class="flex-1 md:flex-none bg-slate-50 dark:bg-slate-800 border-none rounded-lg py-1 px-3 text-[10px] font-black focus:ring-2 focus:ring-blue-600 text-slate-700 dark:text-slate-200 uppercase tracking-widest cursor-pointer">
-                    @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $b)
-                        <option value="{{ $b }}" {{ $bulanIni == $b ? 'selected' : '' }}>{{ substr($b, 0, 3) }}</option>
+                    @foreach([1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'] as $num => $nama)
+                        <option value="{{ $num }}" {{ $bulanIni == $num ? 'selected' : '' }}>{{ substr($nama, 0, 3) }}</option>
                     @endforeach
                 </select>
                 <select name="tahun" onchange="this.form.submit()" class="flex-1 md:flex-none bg-slate-50 dark:bg-slate-800 border-none rounded-lg py-1 px-3 text-[10px] font-black focus:ring-2 focus:ring-blue-600 text-slate-700 dark:text-slate-200 uppercase tracking-widest cursor-pointer">
@@ -38,7 +38,7 @@
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-800/50 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-slate-100 dark:border-slate-800">
                             <th class="px-4 py-2 whitespace-nowrap">Warga / No. Rumah</th>
-                            <th class="px-4 py-2 text-center whitespace-nowrap">Status {{ substr($bulanIni, 0, 3) }}</th>
+                            <th class="px-4 py-2 text-center whitespace-nowrap">Status {{ [1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'Mei',6=>'Jun',7=>'Jul',8=>'Ags',9=>'Sep',10=>'Okt',11=>'Nov',12=>'Des'][$bulanIni] ?? 'Bulan Ini' }}</th>
                             <th class="px-4 py-2 text-right whitespace-nowrap">Total Tunggakan</th>
                             <th class="px-4 py-2 text-center whitespace-nowrap">Aksi</th>
                         </tr>
@@ -55,6 +55,8 @@
                                     <span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md text-[8px] font-black uppercase border border-emerald-100">Lunas</span>
                                 @elseif($item['status_sekarang'] == 'pending')
                                     <span class="bg-amber-50 text-amber-600 px-2 py-0.5 rounded-md text-[8px] font-black uppercase border border-amber-100">Pending</span>
+                                @elseif($item['status_sekarang'] == 'belum_ada')
+                                    <span class="bg-slate-50 text-slate-500 px-2 py-0.5 rounded-md text-[8px] font-black uppercase border border-slate-200">Tidak Ada Tagihan</span>
                                 @else
                                     <span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded-md text-[8px] font-black uppercase border border-rose-100">Belum Bayar</span>
                                 @endif

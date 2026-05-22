@@ -38,8 +38,8 @@
             <form action="{{ route('verifikasi.index') }}" method="GET" class="flex flex-wrap gap-2 w-full md:w-auto">
                 <select name="bulan" class="bg-slate-50 dark:bg-slate-800 border-none rounded-lg py-2 px-3 text-xs font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
                     <option value="">Semua Bulan</option>
-                    @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $bln)
-                        <option value="{{ $bln }}" {{ request('bulan') == $bln ? 'selected' : '' }}>{{ $bln }}</option>
+                    @foreach([1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'] as $num => $bln)
+                        <option value="{{ $num }}" {{ request('bulan') == $num ? 'selected' : '' }}>{{ $bln }}</option>
                     @endforeach
                 </select>
 
@@ -71,7 +71,9 @@
                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all">
                         <td class="px-6 py-4">
                             <div class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase">{{ $pay->user->name ?? 'Warga' }}</div>
-                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{{ $pay->bulan }} {{ $pay->tahun }}</div>
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">
+                                {{ [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'][$pay->bulan] ?? 'Bulan '.$pay->bulan }} {{ $pay->tahun }}
+                            </div>
                         </td>
                         <td class="px-6 py-4">
                             <!-- Nominal dengan Trik Fallback, jadi kebal error walau salah kolom DB -->

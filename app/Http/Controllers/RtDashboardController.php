@@ -19,18 +19,14 @@ class RtDashboardController extends Controller
     $totalPengeluaran = Agenda::sum('realisasi_dana');
     $saldoAktual = $totalPemasukan - $totalPengeluaran;
 
-    // --- PERBAIKAN LOGIKA KEPATUHAN (PAKAI ANGKA) ---
+    // --- LOGIKA KEPATUHAN (BULAN SUDAH STANDAR INTEGER) ---
         $now = \Carbon\Carbon::now();
-        $bulanAngka = $now->month; // Hasilnya: 5
-        $bulanZero = $now->format('m'); // Hasilnya: "05"
+        $bulanSekarang = $now->month; // Integer 1-12
         $tahunSekarang = $now->year;
         
         $wargaLunas = Billing::where('status', 'lunas')
             ->where('tahun', $tahunSekarang)
-            ->where(function($q) use ($bulanAngka, $bulanZero) {
-                $q->where('bulan', $bulanAngka)
-                  ->orWhere('bulan', $bulanZero);
-            })
+            ->where('bulan', $bulanSekarang)
             ->count();
             
         $persenKepatuhan = $totalWarga > 0 ? round(($wargaLunas / $totalWarga) * 100) : 0;
@@ -47,21 +43,13 @@ class RtDashboardController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $date = \Carbon\Carbon::now()->subMonths($i);
             
-            // Label tetap pakai nama bulan (Jan, Feb) agar bagus di grafik
+            // Label pakai nama bulan singkat (Jan, Feb) agar bagus di grafik
             $labelBulan[] = $date->translatedFormat('M'); 
 
-            // Ambil angka bulannya (1 untuk Jan, 5 untuk Mei)
-            $bulanAngka = $date->month; 
-            // Buat versi leading zero (01, 02... 05) untuk jaga-jaga
-            $bulanZero = $date->format('m');
-
-            // Kueri mencari angka bulan (misal 5 atau "05")
+            // Query langsung pakai integer bulan (sudah standar)
             $lunas = \App\Models\Billing::where('status', 'lunas')
                 ->where('tahun', $date->year)
-                ->where(function($q) use ($bulanAngka, $bulanZero) {
-                    $q->where('bulan', $bulanAngka)
-                      ->orWhere('bulan', $bulanZero);
-                })
+                ->where('bulan', $date->month)
                 ->count();
             
             $dataKepatuhan[] = $lunas;

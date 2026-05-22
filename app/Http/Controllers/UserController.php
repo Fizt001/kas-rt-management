@@ -181,25 +181,31 @@ class UserController extends Controller
     }
 
     public function updateProfileWarga(Request $request)
-{
-    // 1. Validasi input (tambahkan no_rumah)
-    $request->validate([
-        'target_user_id' => 'required|exists:users,id',
-        'no_rumah'       => 'nullable|string|max:50',
-        'no_kk'          => 'nullable|string|max:30',
-        'nik'            => 'nullable|string|max:30',
-    ]);
+    {
+        // 1. Validasi input
+        $request->validate([
+            'target_user_id' => 'required|exists:users,id',
+            'no_rumah'       => 'nullable|string|max:50',
+            'no_kk'          => 'nullable|string|max:30',
+            'nik'            => 'nullable|string|max:30',
+        ]);
 
-    // 2. Ambil User target
-    $user = \App\Models\User::findOrFail($request->target_user_id);
+        // 2. Cek Otorisasi: warga hanya boleh update profil dirinya sendiri
+        $targetId = $request->target_user_id;
+        if ($targetId != auth()->id() && !in_array(auth()->user()->role, ['superadmin', 'rt'])) {
+            abort(403, 'Anda tidak diizinkan mengubah data warga lain.');
+        }
 
-    // 3. Update data ke tabel USERS
-    $user->update([
-        'no_rumah' => strtoupper($request->no_rumah), // Biar otomatis huruf kapital
-        'no_kk'    => $request->no_kk,
-        'nik'      => $request->nik,
-    ]);
+        // 3. Ambil User target
+        $user = User::findOrFail($targetId);
 
-    return back()->with('success', 'Data Identitas Keluarga Berhasil Diperbarui!');
-}
+        // 4. Update data ke tabel USERS
+        $user->update([
+            'no_rumah' => strtoupper($request->no_rumah), // Biar otomatis huruf kapital
+            'no_kk'    => $request->no_kk,
+            'nik'      => $request->nik,
+        ]);
+
+        return back()->with('success', 'Data Identitas Keluarga Berhasil Diperbarui!');
+    }
 }

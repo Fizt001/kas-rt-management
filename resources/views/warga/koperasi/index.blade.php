@@ -18,6 +18,12 @@
         {{-- WRAPPER UTAMA --}}
         <div x-data="{ 
             showModalQRIS: false,
+            showModalSetor: false,
+            showModalTarik: false,
+            showModalKasbon: false,
+            showModalCicilan: false,
+            cicilanId: null,
+            nominalCicilan: 0,
             copyToClipboard(text) {
                 navigator.clipboard.writeText(text);
                 alert('Nomor Rekening Koperasi berhasil disalin!');
@@ -71,6 +77,64 @@
                     <h3 class="text-lg font-black dark:text-white italic tracking-tight">Rp{{ number_format($akun->saldo_sukarela ?? 0, 0, ',', '.') }}</h3>
                 </div>
             </div>
+
+            {{-- MENU AKSI TRANSAKSI KHUSUS WARGA --}}
+            @if($targetUser->id == auth()->id())
+            <div class="flex flex-wrap justify-center sm:justify-start gap-3 mt-2">
+                <button @click="showModalSetor = true" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md shadow-emerald-500/20 active:scale-95 transition-all">
+                    + Setor Saldo
+                </button>
+                <button @click="showModalTarik = true" class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md shadow-rose-500/20 active:scale-95 transition-all">
+                    - Tarik Dana
+                </button>
+                @if(!$pinjamanAktif)
+                <button @click="showModalKasbon = true" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md shadow-amber-500/20 active:scale-95 transition-all">
+                    💸 Ajukan Kasbon
+                </button>
+                @endif
+            </div>
+            @endif
+
+            {{-- JIKA PUNYA PINJAMAN AKTIF --}}
+            @if($pinjamanAktif)
+                <div class="bg-rose-50 dark:bg-rose-900/20 rounded-[2rem] p-6 border border-rose-100 dark:border-rose-800 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-1">Pinjaman / Kasbon Aktif</p>
+                        <h3 class="text-xl font-black text-rose-700 dark:text-rose-400">Rp{{ number_format($pinjamanAktif->amount, 0, ',', '.') }}</h3>
+                        <p class="text-[10px] font-bold text-slate-500 mt-1 uppercase">{{ $pinjamanAktif->alasan }} (Tenor: {{ $pinjamanAktif->tenor }} bln)</p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        @if($pinjamanAktif->status == 'pending')
+                            <span class="bg-amber-100 text-amber-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-amber-200">Menunggu Persetujuan Pengurus</span>
+                        @else
+                            @php
+                                $cicilanBulanIni = $pinjamanAktif->installments()->where('status', 'belum_bayar')->first();
+                                $totalTerbayar = $pinjamanAktif->installments()->where('status', 'lunas')->sum('amount');
+                                $sisa = $pinjamanAktif->amount - $totalTerbayar;
+                            @endphp
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Sisa Tagihan: Rp{{ number_format($sisa, 0, ',', '.') }}</p>
+                            @if($cicilanBulanIni && $targetUser->id == auth()->id())
+                                <div class="flex flex-col gap-2 md:items-end">
+                                    <button @click="cicilanId = {{ $cicilanBulanIni->id }}; nominalCicilan = {{ $cicilanBulanIni->amount }}; showModalCicilan = true" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md active:scale-95 transition-all">Upload Bukti Transfer</button>
+                                    
+                                    @if(isset($akun) && $akun->saldo_sukarela >= $cicilanBulanIni->amount)
+                                    <form action="{{ route('warga.koperasi.cicilan.saldo', $cicilanBulanIni->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin memotong Saldo Sukarela sebesar Rp{{ number_format($cicilanBulanIni->amount, 0, ',', '.') }} untuk membayar cicilan ini?')">
+                                        @csrf
+                                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md active:scale-95 transition-all flex items-center justify-center gap-1">
+                                            <span>Bayar via Saldo Sukarela</span>
+                                        </button>
+                                    </form>
+                                    @else
+                                    <p class="text-[8px] font-bold text-rose-500 mt-1">*Saldo Sukarela tidak cukup untuk potong otomatis</p>
+                                    @endif
+                                </div>
+                            @else
+                                <span class="text-[10px] font-black text-emerald-600 uppercase border-b border-emerald-300">Cicilan Lunas / Sedang Diverifikasi</span>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            @endif
 
             {{-- 3. GRID UTAMA: RIWAYAT & TUJUAN TRANSFER --}}
             <div class="grid lg:grid-cols-10 gap-6">
@@ -164,6 +228,125 @@
                                 <button @click="showModalQRIS = false" class="mt-6 w-full py-3 bg-amber-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">Tutup Gambar</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- MODAL SETOR SALDO --}}
+            <div x-show="showModalSetor" style="display: none;" class="fixed inset-0 z-[150] overflow-y-auto" x-cloak>
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalSetor = false"></div>
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div x-show="showModalSetor" class="relative bg-white dark:bg-slate-900 shadow-2xl rounded-[2.5rem] w-full max-w-sm p-6 text-left">
+                        <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight mb-4">Setor <span class="text-emerald-500">Saldo</span></h3>
+                        <form action="{{ route('warga.koperasi.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Jenis Simpanan</label>
+                                <select name="kategori" required class="w-full bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 text-slate-800">
+                                    <option value="wajib">Simpanan Wajib</option>
+                                    <option value="sukarela">Simpanan Sukarela</option>
+                                    <option value="pokok">Simpanan Pokok</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Nominal (Min Rp 10.000)</label>
+                                <input type="number" name="amount" required min="10000" class="w-full bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 text-slate-800" placeholder="Contoh: 50000">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Bukti Transfer</label>
+                                <input type="file" name="bukti_transfer" accept="image/*" required class="w-full bg-slate-50 border-none rounded-xl text-xs font-medium file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-600 text-slate-800">
+                            </div>
+                            <div class="pt-4 flex gap-2">
+                                <button type="button" @click="showModalSetor = false" class="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[9px] uppercase tracking-widest">Batal</button>
+                                <button type="submit" class="flex-[2] py-3 bg-emerald-500 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-md">Kirim Setoran</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {{-- MODAL TARIK DANA --}}
+            <div x-show="showModalTarik" style="display: none;" class="fixed inset-0 z-[150] overflow-y-auto" x-cloak>
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalTarik = false"></div>
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div x-show="showModalTarik" class="relative bg-white dark:bg-slate-900 shadow-2xl rounded-[2.5rem] w-full max-w-sm p-6 text-left">
+                        <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight mb-1">Tarik <span class="text-rose-500">Dana</span></h3>
+                        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-4">Hanya dari Saldo Sukarela</p>
+                        <form action="{{ route('warga.koperasi.tarik') }}" method="POST" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Nominal (Min Rp 10.000)</label>
+                                <input type="number" name="amount" required min="10000" max="{{ $akun->saldo_sukarela ?? 0 }}" class="w-full bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-rose-500 text-slate-800" placeholder="Contoh: 50000">
+                                <p class="text-[8px] font-bold text-slate-400 uppercase mt-1">Saldo tersedia: Rp{{ number_format($akun->saldo_sukarela ?? 0, 0, ',', '.') }}</p>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Rekening Tujuan Pencairan</label>
+                                <input type="text" name="bank_tujuan" required class="w-full bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-rose-500 text-slate-800" placeholder="Contoh: BCA 123456 a/n Agus">
+                            </div>
+                            <div class="pt-4 flex gap-2">
+                                <button type="button" @click="showModalTarik = false" class="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[9px] uppercase tracking-widest">Batal</button>
+                                <button type="submit" class="flex-[2] py-3 bg-rose-500 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-md">Ajukan Penarikan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {{-- MODAL AJUKAN KASBON --}}
+            <div x-show="showModalKasbon" style="display: none;" class="fixed inset-0 z-[150] overflow-y-auto" x-cloak>
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalKasbon = false"></div>
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div x-show="showModalKasbon" class="relative bg-white dark:bg-slate-900 shadow-2xl rounded-[2.5rem] w-full max-w-sm p-6 text-left">
+                        <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight mb-4">Ajukan <span class="text-amber-500">Kasbon</span></h3>
+                        <form action="{{ route('warga.koperasi.pinjam') }}" method="POST" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Nominal Kasbon</label>
+                                <input type="number" name="amount" required min="50000" class="w-full bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-amber-500 text-slate-800" placeholder="Contoh: 1000000">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Tenor Cicilan (Bulan)</label>
+                                <select name="tenor" required class="w-full bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-amber-500 text-slate-800">
+                                    @for($i=1; $i<=12; $i++)
+                                        <option value="{{ $i }}">{{ $i }} Bulan</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Alasan Peminjaman</label>
+                                <input type="text" name="alasan" required class="w-full bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-amber-500 text-slate-800" placeholder="Contoh: Kebutuhan medis mendesak">
+                            </div>
+                            <div class="pt-4 flex gap-2">
+                                <button type="button" @click="showModalKasbon = false" class="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[9px] uppercase tracking-widest">Batal</button>
+                                <button type="submit" class="flex-[2] py-3 bg-amber-500 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-md">Ajukan Sekarang</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {{-- MODAL BAYAR CICILAN --}}
+            <div x-show="showModalCicilan" style="display: none;" class="fixed inset-0 z-[150] overflow-y-auto" x-cloak>
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalCicilan = false"></div>
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div x-show="showModalCicilan" class="relative bg-white dark:bg-slate-900 shadow-2xl rounded-[2.5rem] w-full max-w-sm p-6 text-left">
+                        <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight mb-4">Bayar <span class="text-emerald-500">Cicilan</span></h3>
+                        <form :action="`/warga/koperasi/cicilan/${cicilanId}`" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            @csrf
+                            <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-center">
+                                <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Nominal Pembayaran</p>
+                                <h4 class="text-xl font-black text-emerald-700">Rp<span x-text="nominalCicilan.toLocaleString('id-ID')"></span></h4>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Upload Bukti Transfer</label>
+                                <input type="file" name="bukti_transfer" accept="image/*" required class="w-full bg-slate-50 border-none rounded-xl text-xs font-medium file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-600 text-slate-800">
+                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-2">*Transfer ke rekening koperasi tertera di atas</p>
+                            </div>
+                            <div class="pt-4 flex gap-2">
+                                <button type="button" @click="showModalCicilan = false" class="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[9px] uppercase tracking-widest">Batal</button>
+                                <button type="submit" class="flex-[2] py-3 bg-emerald-500 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-md">Kirim Bukti Pembayaran</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

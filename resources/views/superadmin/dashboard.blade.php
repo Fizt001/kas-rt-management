@@ -65,6 +65,16 @@
                 ->whereYear('created_at', $tahunQuery)
                 ->sum('amount') : 0;
         }
+
+        // =========================================================================
+        // DATA UNTUK DOUGHNUT CHART: Status Pembayaran IPL Per Bulan
+        // =========================================================================
+        $selectedMonth = request('month', now()->month);
+        $selectedYear = request('year', now()->year);
+        
+        $tagihanLunas = class_exists('\App\Models\Billing') ? \App\Models\Billing::where('bulan', $selectedMonth)->where('tahun', $selectedYear)->where('status', 'lunas')->count() : 0;
+        $tagihanBelum = class_exists('\App\Models\Billing') ? \App\Models\Billing::where('bulan', $selectedMonth)->where('tahun', $selectedYear)->whereIn('status', ['belum_lunas', 'pending'])->count() : 0;
+
     @endphp
 
     <x-slot name="header">
@@ -152,12 +162,32 @@
             </div>
 
             {{-- DOUGHNUT GRAPH (4 Kolom) --}}
-            <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 rounded-[2.5rem] shadow-sm flex flex-col justify-between">
-                <div class="flex flex-col mb-6 border-b border-slate-50 dark:border-slate-800 pb-4">
-                    <h3 class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-widest">Proporsi Kas Wilayah</h3>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Perbandingan Volume Kas Berjalan</p>
+            <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 rounded-[2.5rem] shadow-sm flex flex-col justify-between relative">
+                <div class="flex flex-col mb-4 border-b border-slate-50 dark:border-slate-800 pb-4">
+                    <h3 class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-widest">Status Pembayaran IPL</h3>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Lunas vs Belum Lunas</p>
                 </div>
-                <div class="relative w-full h-64 flex items-center justify-center">
+
+                {{-- Form Pilihan Bulan & Tahun --}}
+                <form action="{{ url()->current() }}" method="GET" class="flex gap-2 mb-4">
+                    <select name="month" class="bg-slate-50 border-none rounded-lg text-[10px] font-bold py-2 px-3 flex-1 focus:ring-2 focus:ring-emerald-500" onchange="this.form.submit()">
+                        @foreach([1=>'Januari', 2=>'Februari', 3=>'Maret', 4=>'April', 5=>'Mei', 6=>'Juni', 7=>'Juli', 8=>'Agustus', 9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember'] as $num => $name)
+                            <option value="{{ $num }}" {{ $selectedMonth == $num ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    <select name="year" class="bg-slate-50 border-none rounded-lg text-[10px] font-bold py-2 px-3 flex-1 focus:ring-2 focus:ring-emerald-500" onchange="this.form.submit()">
+                        @for($y = now()->year - 1; $y <= now()->year + 1; $y++)
+                            <option value="{{ $y }}" {{ $selectedYear == $y ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
+                </form>
+
+                <div class="relative w-full h-56 flex items-center justify-center">
+                    @if($tagihanLunas == 0 && $tagihanBelum == 0)
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <p class="text-[9px] font-black uppercase text-slate-300 text-center tracking-widest">Belum ada tagihan<br>digenerate</p>
+                        </div>
+                    @endif
                     <canvas id="chartDistribusiAsset"></canvas>
                 </div>
             </div>
@@ -241,15 +271,18 @@
                 }
             });
 
-            // 2. CONFIG GRAPH DOUGHNUT (PROPORSI ASSET LIVE)
+            // 2. CONFIG GRAPH DOUGHNUT (STATUS PEMBAYARAN IPL)
             const ctxAsset = document.getElementById('chartDistribusiAsset').getContext('2d');
+            const dataLunas = {{ $tagihanLunas }};
+            const dataBelum = {{ $tagihanBelum }};
+
             new Chart(ctxAsset, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Dana RT', 'Dana Mesjid', 'Dana Koperasi'],
+                    labels: ['Sudah Bayar', 'Belum Tertagih'],
                     datasets: [{
-                        data: {!! json_encode([$totalKasRT, $saldoMesjid, $modalKoperasi]) !!},
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+                        data: (dataLunas === 0 && dataBelum === 0) ? [0.001] : [dataLunas, dataBelum],
+                        backgroundColor: (dataLunas === 0 && dataBelum === 0) ? ['#f1f5f9'] : ['#10b981', '#f43f5e'],
                         borderWidth: 5,
                         borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff'
                     }]
@@ -258,7 +291,15 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 11 }, padding: 15 } }
+                        legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 10 }, padding: 15 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if(dataLunas === 0 && dataBelum === 0) return ' Belum Ada Tagihan';
+                                    return ' ' + context.label + ': ' + context.raw + ' Warga';
+                                }
+                            }
+                        }
                     },
                     cutout: '72%'
                 }

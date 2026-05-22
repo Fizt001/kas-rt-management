@@ -48,13 +48,19 @@ class KoperasiWargaController extends Controller
     {
         $user = Auth::user();
 
+        // Cek apakah sudah punya akun koperasi
+        $existing = KoperasiAccount::where('user_id', $user->id)->first();
+        if ($existing) {
+            return back()->with('error', 'Anda sudah terdaftar sebagai anggota Koperasi RT.');
+        }
+
         // Buat akun koperasi dengan saldo awal 0
         KoperasiAccount::create([
-            'user_id' => $user->id,
-            'saldo_pokok' => 0,
-            'saldo_wajib' => 0,
+            'user_id'        => $user->id,
+            'saldo_pokok'    => 0,
+            'saldo_wajib'    => 0,
             'saldo_sukarela' => 0,
-            'total_saldo' => 0
+            'total_saldo'    => 0
         ]);
 
         return redirect()->route('warga.koperasi')->with('success', 'Selamat! Anda resmi bergabung dengan Koperasi RT. Silakan lakukan setoran Simpanan Pokok pertama Anda.');
@@ -168,5 +174,50 @@ class KoperasiWargaController extends Controller
         }
 
         return back()->with('success', 'Bukti pembayaran cicilan berhasil dikirim! Silakan tunggu verifikasi pengurus.');
+    }
+
+    /**
+     * Memproses pembayaran cicilan kasbon warga menggunakan potong saldo sukarela
+     */
+    public function bayarCicilanPakaiSaldo(Request $request, $id)
+    {
+        $cicilan = \App\Models\KoperasiLoanInstallment::findOrFail($id);
+        $user = Auth::user();
+        $akun = KoperasiAccount::where('user_id', $user->id)->first();
+
+        if (!$akun || $akun->saldo_sukarela < $cicilan->amount) {
+            return back()->with('error', 'Saldo Sukarela Anda tidak mencukupi untuk membayar cicilan ini (Butuh: Rp ' . number_format($cicilan->amount, 0, ',', '.') . ').');
+        }
+
+        // Potong saldo sukarela
+        $akun->saldo_sukarela -= $cicilan->amount;
+        $akun->total_saldo -= $cicilan->amount;
+        $akun->save();
+
+        // Catat transaksi mutasi
+        KoperasiTransaction::create([
+            'user_id'    => $user->id,
+            'type'       => 'penarikan', // as in uang keluar dari tabungan
+            'kategori'   => 'sukarela',
+            'amount'     => $cicilan->amount,
+            'keterangan' => 'Potong saldo untuk bayar cicilan kasbon',
+            'status'     => 'approved', // Langsung approved
+        ]);
+
+        // Update status cicilan
+        $cicilan->update([
+            'bukti_transfer' => 'POTONG_SALDO',
+            'status'         => 'lunas',
+            'paid_at'        => now()
+        ]);
+
+        // Cek apakah semua cicilan untuk kasbon ini sudah lunas
+        $pinjaman = \App\Models\KoperasiLoan::find($cicilan->koperasi_loan_id);
+        $sisaBelumLunas = $pinjaman->installments()->where('status', '!=', 'lunas')->count();
+        if ($sisaBelumLunas == 0) {
+            $pinjaman->update(['status' => 'lunas']);
+        }
+
+        return back()->with('success', 'Cicilan berhasil dibayar dengan memotong Saldo Sukarela Anda!');
     }
 }
