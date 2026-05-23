@@ -32,22 +32,22 @@ class KasController extends Controller
             7=>'Juli', 8=>'Agustus', 9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember'
         ];
 
+        $masukPerBulan = Billing::where('status', 'lunas')
+            ->where('tahun', $tahunIni)
+            ->selectRaw('bulan, SUM(total_amount) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        $keluarPerBulan = Agenda::whereYear('tanggal', $tahunIni)
+            ->selectRaw('MONTH(tanggal) as bulan, SUM(realisasi_dana) as total')
+            ->groupByRaw('MONTH(tanggal)')
+            ->pluck('total', 'bulan');
+
         foreach ($namaBulan as $num => $nama) {
-            // Pemasukan per bulan (bulan sudah integer, query langsung)
-            $masuk = Billing::where('status', 'lunas')
-                ->where('tahun', $tahunIni)
-                ->where('bulan', $num)
-                ->sum('total_amount') ?? 0;
-
-            // Pengeluaran per bulan (berdasarkan tanggal acara di agendas)
-            $keluar = Agenda::whereYear('tanggal', $tahunIni)
-                ->whereMonth('tanggal', $num)
-                ->sum('realisasi_dana') ?? 0;
-
             $grafikBulanan[] = [
                 'bulan'  => $nama,
-                'masuk'  => $masuk,
-                'keluar' => $keluar
+                'masuk'  => $masukPerBulan[$num] ?? 0,
+                'keluar' => $keluarPerBulan[$num] ?? 0
             ];
         }
 

@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Billing;
 use App\Models\Agenda;
-use App\Models\Infaq; // Import Model Infaq
-use App\Models\KoperasiAccount; // Import Model Koperasi
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -51,21 +49,10 @@ class WargaDashboardController extends Controller
         $agendaTerdekat = Agenda::where('tanggal', '>=', $now->startOfDay())
             ->orderBy('tanggal', 'asc')->take(3)->get();
 
-        // 4. Data Mesjid (Ambil dari tabel Infaq yang statusnya terverifikasi)
-        $totalInfaq = Infaq::where('user_id', $user->id)
-            ->where('status', 'terverifikasi')
-            ->sum('nominal');
-
-        // 5. Data Koperasi (Ambil total_saldo dari akun warga)
-        $akunKoperasi = KoperasiAccount::where('user_id', $user->id)->first();
-        $totalTabungan = $akunKoperasi ? $akunKoperasi->total_saldo : 0;
-
         return view('warga.dashboard', compact(
             'statusBulanIni', 
-            'totalInfaq', 
-            'totalTabungan', // Kirim variabel ini ke view
             'agendaTerdekat', 
-            'labelBulan', 
+            'labelBulan',  
             'dataBayarSaya', 
             'dataPengeluaranRT'
         ));

@@ -19,7 +19,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-    'name', 'email', 'password', 'role', 'no_rumah', 'no_kk', 'nik', 'tanggal_lahir'
+    'name', 'email', 'password', 'role', 'blok_rumah', 'no_rumah', 'no_kk', 'nik', 'tanggal_lahir'
 ];
 
     /**
@@ -58,8 +58,5 @@ class User extends Authenticatable
         return $this->hasMany(FamilyMember::class);
     }
 
-    public function koperasiAccount()
-{
-    return $this->hasOne(KoperasiAccount::class, 'user_id');
-}
+
 }

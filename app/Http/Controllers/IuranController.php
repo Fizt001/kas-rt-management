@@ -177,6 +177,10 @@ class IuranController extends Controller
 
         $tagihan = Billing::findOrFail($id);
 
+        if ($tagihan->user_id !== auth()->id() && auth()->user()->role === 'warga') {
+            abort(403, 'Unauthorized action. Anda tidak dapat membayar tagihan warga lain.');
+        }
+
         if ($request->hasFile('bukti_transfer')) {
             $file = $request->file('bukti_transfer');
             $namaFile = time() . '_' . $file->getClientOriginalName();
@@ -192,61 +196,5 @@ class IuranController extends Controller
         return back()->with('success', 'Bukti pembayaran berhasil dikirim!');
     }
     
-    /**
-     * Fitur Sultan: Bayar Iuran RT Otomatis pakai Saldo Koperasi
-     */
-    public function bayarPakaiKoperasi(Request $request, $id)
-    {
-        // 1. Cari data tagihan (Billing) yang mau dibayar
-        $tagihan = \App\Models\Billing::findOrFail($id); 
 
-        $user = \Illuminate\Support\Facades\Auth::user();
-
-        try {
-            \Illuminate\Support\Facades\DB::beginTransaction();
-
-            // 2. Lock baris saldo agar request bersamaan tidak bisa lolos validasi sekaligus
-            $akunKoperasi = \App\Models\KoperasiAccount::where('user_id', $user->id)
-                ->lockForUpdate()
-                ->first();
-
-            // 3. Validasi: Apakah warga punya akun koperasi dan saldo sukarelanya cukup?
-            if (!$akunKoperasi || $akunKoperasi->saldo_sukarela < $tagihan->total_amount) {
-                \Illuminate\Support\Facades\DB::rollBack();
-                return back()->with('error', 'Saldo Sukarela Koperasi Anda tidak mencukupi untuk membayar tagihan ini. (Dibutuhkan: Rp ' . number_format($tagihan->total_amount, 0, ',', '.') . ')');
-            }
-
-            // 4. Potong Saldo Sukarela Koperasi
-            $akunKoperasi->saldo_sukarela -= $tagihan->total_amount;
-            // Update total saldo secara akurat
-            $akunKoperasi->total_saldo = $akunKoperasi->saldo_pokok + $akunKoperasi->saldo_wajib + $akunKoperasi->saldo_sukarela;
-            $akunKoperasi->save();
-
-            // 5. Catat Mutasi Keluar di Buku Koperasi (Otomatis Approved)
-            \App\Models\KoperasiTransaction::create([
-                'user_id'        => $user->id,
-                'type'           => 'penarikan',
-                'kategori'       => 'sukarela',
-                'amount'         => $tagihan->total_amount,
-                'keterangan'     => 'Pembayaran Otomatis Iuran RT (' . $tagihan->bulan . ' ' . $tagihan->tahun . ')',
-                'status'         => 'approved',
-            ]);
-
-            // 6. Update Status Tagihan (Billing) menjadi LUNAS seketika
-            $tagihan->update([
-                'status'         => 'lunas', 
-                'verified_at'    => now(),
-                'verified_by'    => $user->id, // Warga memverifikasi dirinya sendiri pakai sistem
-                'bukti_transfer' => 'PAID_VIA_KOPERASI' // Sebagai penanda buat Admin/Bendahara
-            ]);
-
-            \Illuminate\Support\Facades\DB::commit();
-
-            return back()->with('success', 'Luar biasa! Tagihan Iuran RT berhasil dilunasi menggunakan Saldo Koperasi Anda.');
-
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
-        }
-    }
 }

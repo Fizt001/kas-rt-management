@@ -1,8 +1,8 @@
 # KAS-RT Digital Management System 🚀
-Aplikasi Manajemen Lingkungan Terpadu (Iuran, Mesjid, & Koperasi)
+Aplikasi Manajemen Lingkungan Terpadu (Iuran & Kegiatan Warga)
 
 ## 📋 Deskripsi Proyek
-**KAS-RT Digital** adalah platform ekosistem warga yang mengintegrasikan pengelolaan iuran lingkungan, transparansi dana mesjid, dan kemandirian ekonomi melalui koperasi warga. Sistem ini dirancang untuk meningkatkan transparansi, memudahkan administrasi, dan mempererat interaksi sosial warga.
+**KAS-RT Digital** adalah platform ekosistem warga yang mendigitalisasi pengelolaan iuran lingkungan dan transparansi dana RT. Sistem ini dirancang untuk meningkatkan transparansi, memudahkan administrasi, dan mempererat interaksi sosial antar warga melalui integrasi sistem keuangan dan kegiatan.
 
 ---
 
@@ -20,11 +20,9 @@ Aplikasi Manajemen Lingkungan Terpadu (Iuran, Mesjid, & Koperasi)
 | Role | Tanggung Jawab Utama |
 | :--- | :--- |
 | **Superadmin** | Manajemen User, Audit Sistem, & Akses Penuh ke seluruh modul. |
-| **Pak RT** | Monitoring Laporan Kas Global (RT, Mesjid, Koperasi) & Kebijakan Lingkungan. |
-| **Bendahara RT** | Manajemen Iuran Warga (Sampah/Keamanan) & Kas Umum Lingkungan. |
-| **Pengurus Mesjid** | Manajemen Infaq, Pengeluaran Operasional Mesjid, & Transparansi Dana Jemaah. |
-| **Pengurus Koperasi** | Pengelolaan Simpanan (Pokok/Wajib/Sukarela) & Verifikasi Pinjaman Kasbon. |
-| **Warga** | Pembayaran Iuran, Penunaian Infaq, & Manajemen Tabungan Koperasi. |
+| **Pak RT** | Monitoring Laporan Kas Global RT & Manajemen Kebijakan Lingkungan. |
+| **Bendahara RT** | Manajemen Iuran Warga (Sampah/Keamanan), Validasi Pembayaran & Kas Umum. |
+| **Warga** | Pembayaran Iuran, Pembaruan Data Keluarga, & Partisipasi Kegiatan. |
 
 ---
 
@@ -32,26 +30,20 @@ Aplikasi Manajemen Lingkungan Terpadu (Iuran, Mesjid, & Koperasi)
 
 ### 1. Portal Warga (Dashboard Utama)
 * **Status Iuran Real-time:** Notifikasi lunas/nunggak bulan berjalan.
-* **Smart Infaq Card:** Ringkasan total amal jariyah di Mesjid.
-* **Koperasi Wallet:** Monitoring saldo tabungan dan status cicilan kasbon.
-* **Chart Transparansi:** Perbandingan kontribusi pribadi vs total pengeluaran RT.
+* **Pembayaran Terintegrasi:** Unggah struk bukti transfer dengan aman (IDOR Protected).
+* **Data Keluarga:** Manajemen profil pribadi & Sub-KK secara mandiri.
+* **Info Kegiatan:** Akses jadwal kegiatan dan laporan keuangan terkini.
 
-### 2. Modul Pengurus Mesjid
-* **Logic "Loss" Infaq:** Infaq warga otomatis disetujui tanpa antrean verifikasi manual.
-* **Expenditure Tracker:** Pencatatan biaya operasional (Listrik, Gaji Marbot) + Upload Bukti Nota.
-* **Payment Settings:** Pengaturan mandiri Norek & Barcode QRIS Mesjid.
-* **Layout 70:30:** Area riwayat di sisi kiri dan panduan bayar di sisi kanan.
+### 2. Modul Pengurus & Bendahara
+* **Validasi Satu Pintu:** Sistem verifikasi pembayaran iuran warga yang cepat dan efisien.
+* **Manajemen Warga (Anti Ganda):** Validasi *Unique Constraint* mencegah nomor rumah kembar.
+* **Master Iuran:** Pengaturan nominal jenis iuran secara dinamis.
+* **Payment Settings:** Pengaturan mandiri Nomor Rekening & Barcode QRIS tujuan pembayaran.
 
-### 3. Modul Pengurus Koperasi
-* **Automated Installments:** Pembuatan jadwal cicilan otomatis saat kasbon disetujui.
-* **Savings Analytics:** Visualisasi komposisi saldo (Pokok, Wajib, Sukarela) via Donut Chart.
-* **Withdrawal System:** Manajemen pengajuan penarikan dana sukarela warga.
-* **Payment Settings:** Pengaturan mandiri Norek & Barcode QRIS Koperasi.
-
-### 4. Dashboard Global (Sekretariat RT) - *Development*
-* **Consolidated Balance:** Ringkasan gabungan saldo Kas RT, Kas Mesjid, & Kas Koperasi.
-* **Agenda Manager:** Manajemen jadwal kegiatan warga & kerja bakti.
-* **Manajemen Anggota:** Verifikasi data warga tetap vs warga kontrak.
+### 3. Dashboard Laporan (Sekretariat RT)
+* **Consolidated Balance:** Ringkasan total Pemasukan vs Pengeluaran kas RT.
+* **Grafik Analitik:** Visualisasi data laporan 12 bulan terakhir (Anti N+1 Query Problem).
+* **Agenda Manager:** Manajemen jadwal kegiatan warga & pencatatan realisasi dana/nota.
 
 ---
 
@@ -66,14 +58,12 @@ Aplikasi Manajemen Lingkungan Terpadu (Iuran, Mesjid, & Koperasi)
 ---
 
 ## 🗄️ Skema Database Utama (High Level)
-* `users`: Data autentikasi & role.
-* `billings`: Data tagihan iuran bulanan warga.
-* `infaqs`: Data transaksi infaq mesjid (user_id, nominal, status).
-* `mesjid_payments`: Pengaturan rekening mesjid.
-* `mesjid_expenditures`: Catatan pengeluaran operasional mesjid.
-* `koperasi_accounts`: Data saldo tabungan warga.
-* `koperasi_loans`: Data pinjaman/kasbon & cicilan.
-* `koperasi_payments`: Pengaturan rekening koperasi.
+* `users`: Data autentikasi, Role, & Profil (termasuk Blok & No Rumah dengan *Unique Constraint*).
+* `family_members`: Data profil anggota keluarga & pengelompokan sub-KK.
+* `billings`: Data tagihan iuran bulanan warga & bukti transfer.
+* `agendas`: Manajemen jadwal kegiatan RT, status pelaksanaan, & realisasi dana/pengeluaran.
+* `iuran_masters`: Referensi master dinamis untuk jenis dan besaran iuran RT.
+* `payment_settings`: Pengaturan rekening pembayaran terpusat & integrasi barcode QRIS.
 
 ---
 **Developed with ❤️ for a Better Community.**

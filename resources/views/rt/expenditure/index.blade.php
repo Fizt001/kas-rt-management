@@ -59,7 +59,7 @@
                         $isLocked = $tanggalAcara->startOfDay()->isFuture(); 
                     @endphp
 
-                    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-2xl border {{ $isLocked ? 'border-dashed border-slate-200' : 'border-slate-100 bg-slate-50/50' }}">
+                    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-2xl border {{ $agenda->status === 'batal' ? 'border-dashed border-rose-200 bg-rose-50/30 opacity-70' : ($isLocked ? 'border-dashed border-slate-200' : 'border-slate-100 bg-slate-50/50') }}">
                         
                         <div class="flex-1 w-full">
                             <h4 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">{{ $agenda->judul }}</h4>
@@ -93,7 +93,9 @@
                             </div>
 
                             <div class="flex gap-2 w-full sm:w-auto">
-                                @if(!$isLocked && $canEdit)
+                                @if($agenda->status === 'batal')
+                                    <span class="px-4 py-2 bg-rose-100 text-rose-600 rounded-xl text-[9px] font-black uppercase italic border border-rose-200">Dibatalkan</span>
+                                @elseif(!$isLocked && $canEdit)
                                     <button @click="openFotoModal('{{ $agenda->id }}', '{{ $agenda->judul }}')" class="flex-1 px-3 py-2 bg-emerald-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest">Update Foto</button>
                                     <button @click="openNotaModal('{{ $agenda->id }}', '{{ $agenda->judul }}', '{{ $agenda->realisasi_dana }}')" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest">Update Nota</button>
                                 @elseif($isLocked)
@@ -108,7 +110,7 @@
             </div>
         </div>
 
-        <div x-show="showModalPreview" style="display: none;" class="fixed inset-0 z-[150] overflow-y-auto" x-cloak>
+        <div x-show="showModalPreview" @keydown.window.escape="showModalPreview = false" style="display: none;" class="fixed inset-0 z-[150] overflow-y-auto" x-cloak>
             <div class="fixed inset-0 bg-slate-900/90 backdrop-blur-md" @click="showModalPreview = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4">
                 <div class="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl">
@@ -128,7 +130,7 @@
             </div>
         </div>
 
-        <div x-show="showModalFoto" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
+        <div x-show="showModalFoto" @keydown.window.escape="showModalFoto = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalFoto = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4">
                 <div class="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200">
@@ -146,7 +148,7 @@
             </div>
         </div>
 
-        <div x-show="showModalNota" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
+        <div x-show="showModalNota" @keydown.window.escape="showModalNota = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalNota = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4">
                 <div class="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200">

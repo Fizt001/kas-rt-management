@@ -88,9 +88,9 @@
                             </button>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <form action="{{ route('verifikasi.approve', $pay->id) }}" method="POST" class="inline" onsubmit="return confirm('Validasi pembayaran ini?')">
+                            <form id="form-approve-{{ $pay->id }}" action="{{ route('verifikasi.approve', $pay->id) }}" method="POST" class="inline">
                                 @csrf
-                                <button type="submit" class="py-2 px-4 bg-emerald-500 text-white text-[10px] uppercase tracking-widest font-black rounded-lg hover:bg-emerald-600 shadow-md shadow-emerald-200 transition-all active:scale-95">
+                                <button type="button" onclick="confirmApproval('{{ $pay->id }}', '{{ addslashes($pay->user->name ?? 'Warga') }}', '{{ [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'][$pay->bulan] ?? 'Bulan '.$pay->bulan }}', '{{ $pay->tahun }}')" class="py-2 px-4 bg-emerald-500 text-white text-[10px] uppercase tracking-widest font-black rounded-lg hover:bg-emerald-600 shadow-md shadow-emerald-200 transition-all active:scale-95">
                                     Setujui
                                 </button>
                             </form>
@@ -113,7 +113,7 @@
             </div>
 
             <!-- MODAL ALPINE UNTUK LIHAT BUKTI GAMBAR -->
-            <div x-show="imgModal" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
+            <div x-show="imgModal" @keydown.window.escape="imgModal = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
                 <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="imgModal = false"></div>
                 <div class="flex items-center justify-center min-h-screen p-4 text-center z-10 relative">
                     <div x-show="imgModal" 
@@ -131,4 +131,27 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            function confirmApproval(id, name, month, year) {
+                Swal.fire({
+                    title: 'Verifikasi Pembayaran?',
+                    html: `Anda akan memvalidasi pembayaran dari <b class="uppercase">${name}</b> untuk periode <b>${month} ${year}</b>.<br><br><span class="text-xs text-slate-500">Pastikan nominal dan bukti transfer sudah sesuai sebelum disetujui.</span>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#94a3b8',
+                    confirmButtonText: 'Ya, Validasi!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('form-approve-' + id).submit();
+                    }
+                })
+            }
+        </script>
+    @endpush
 </x-app-layout>

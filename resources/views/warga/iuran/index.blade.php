@@ -12,13 +12,11 @@
         showModalBayar: false, 
         showQrisModal: false,
         bayarUrl: '',
-        bayarKoperasiUrl: '',
         tagihanBulan: '',
         tagihanNominal: '',
         
         openBayarModal(id, bulan, tahun, nominal) {
             this.bayarUrl = `/my-iuran/bayar/${id}`;
-            this.bayarKoperasiUrl = `/my-iuran/bayar-koperasi/${id}`; // Rute baru untuk Sultan
             this.tagihanBulan = `${bulan} ${tahun}`;
             this.tagihanNominal = 'Rp ' + new Intl.NumberFormat('id-ID').format(nominal);
             this.showModalBayar = true;
@@ -196,7 +194,7 @@
         </div>
 
         @if($setting && isset($setting->qris_path) && $setting->qris_path)
-        <div x-show="showQrisModal" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
+        <div x-show="showQrisModal" @keydown.window.escape="showQrisModal = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="showQrisModal = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4 text-center z-10 relative">
                 <div x-show="showQrisModal" 
@@ -217,7 +215,7 @@
         </div>
         @endif
 
-        <div x-show="showModalBayar" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
+        <div x-show="showModalBayar" @keydown.window.escape="showModalBayar = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="showModalBayar = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0 relative">
                 <div x-show="showModalBayar" 
@@ -241,19 +239,7 @@
                         </div>
                     </div>
 
-                    <form :action="bayarKoperasiUrl" method="POST" onsubmit="return confirm('Tagihan ini akan otomatis memotong Saldo Sukarela Koperasi Anda. Lanjutkan?');">
-                        @csrf
-                        <button type="submit" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
-                            <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            Bayar Instan (Saldo Koperasi)
-                        </button>
-                    </form>
 
-                    <div class="flex items-center gap-4 my-5">
-                        <div class="flex-1 h-px bg-slate-100 dark:bg-slate-800"></div>
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Atau Transfer Manual</p>
-                        <div class="flex-1 h-px bg-slate-100 dark:bg-slate-800"></div>
-                    </div>
 
                     <form :action="bayarUrl" method="POST" enctype="multipart/form-data" class="space-y-4">
                         @csrf

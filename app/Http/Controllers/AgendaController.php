@@ -34,7 +34,7 @@ class AgendaController extends Controller
             ->orderBy('tanggal', 'asc')
             ->get();
             
-        $agendasSelesai = Agenda::where('status', 'selesai')
+        $agendasSelesai = Agenda::whereIn('status', ['selesai', 'batal'])
             ->orderBy('tanggal', 'desc')
             ->take(5) // Tampilkan 5 terakhir saja untuk riwayat
             ->get();
@@ -47,12 +47,20 @@ class AgendaController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        $request->validate(['status' => 'required|in:selesai,aktif']);
+        $request->validate(['status' => 'required|in:selesai,aktif,batal']);
 
         $agenda = Agenda::findOrFail($id);
         $agenda->update(['status' => $request->status]);
 
-        return back()->with('success', 'Agenda berhasil diselesaikan!');
+        if ($request->status === 'selesai') {
+            return redirect()->route('expenditures.index')
+                             ->with('success', 'Agenda terlaksana! Silakan unggah foto kegiatan dan nota belanja.');
+        } elseif ($request->status === 'batal') {
+            return redirect()->route('dashboard')
+                             ->with('success', 'Kegiatan telah dibatalkan.');
+        }
+
+        return back()->with('success', 'Status agenda diperbarui!');
     }
 
     /**
@@ -70,7 +78,7 @@ class AgendaController extends Controller
             'status'  => 'aktif'
         ]);
 
-        return back()->with('success', 'Jadwal agenda berhasil diperbarui!');
+        return redirect()->route('dashboard')->with('success', 'Jadwal agenda berhasil ditunda!');
     }
 
     /**
@@ -84,7 +92,7 @@ class AgendaController extends Controller
             'tanggal'   => 'required|date',
             'waktu'     => 'nullable',
             'lokasi'    => 'nullable|string|max:255',
-            'status'    => 'required|in:aktif,selesai',
+            'status'    => 'required|in:aktif,selesai,batal',
         ]);
 
         Agenda::create([
@@ -111,7 +119,7 @@ class AgendaController extends Controller
             'tanggal'   => 'required|date',
             'waktu'     => 'nullable',
             'lokasi'    => 'nullable|string|max:255',
-            'status'    => 'required|in:aktif,selesai',
+            'status'    => 'required|in:aktif,selesai,batal',
         ]);
 
         $agenda = Agenda::findOrFail($id);

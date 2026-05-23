@@ -98,13 +98,13 @@
                                     <div class="flex justify-end gap-2">
                                         <!-- Tombol Edit -->
                                         <button @click="editData = { id: '{{ $master->id }}', nama_iuran: '{{ $master->nama_iuran }}', nominal: '{{ $master->nominal }}', deskripsi: '{{ $master->deskripsi }}' }; modalEdit = true" 
-                                            class="p-2 text-slate-400 hover:text-indigo-600 rounded-xl transition-all">
-                                            <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
+                                            class="p-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100">
+                                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                                         </button>
                                         <!-- Tombol Hapus -->
-                                        <button type="button" onclick="confirmDelete({{ $master->id }})" 
-                                            class="p-2 text-slate-400 hover:text-rose-600 rounded-xl transition-all">
-                                            <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m14.74 9-.34 12m-4.78 0-.34-12m10.32-4.74l-.38 3.42a2 2 0 0 1-1.99 1.74H6.42a2 2 0 0 1-1.99-1.74l-.38-3.42"/></svg>
+                                        <button type="button" onclick="confirmDelete('{{ $master->id }}')" 
+                                            class="p-2 text-rose-600 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-100">
+                                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m14.74 9-.34 12m-4.78 0-.34-12m10.32-4.74l-.38 3.42a2 2 0 0 1-1.99 1.74H6.42a2 2 0 0 1-1.99-1.74l-.38-3.42"/></svg>
                                         </button>
                                         <form action="{{ route('iuran.master.destroy', $master->id) }}" method="POST" id="delete-form-{{ $master->id }}" class="hidden">
                                             @csrf @method('DELETE')
@@ -122,7 +122,7 @@
         </div>
 
         <!-- MODAL TAMBAH (GABUNG) -->
-        <div x-show="modalAdd" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
+        <div x-show="modalAdd" @keydown.window.escape="modalAdd = false" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
             <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" @click="modalAdd = false"></div>
             <div class="relative bg-white dark:bg-slate-900 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-200">
                 <div class="p-6">
@@ -153,7 +153,7 @@
         </div>
 
         <!-- MODAL EDIT (GABUNG) -->
-        <div x-show="modalEdit" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
+        <div x-show="modalEdit" @keydown.window.escape="modalEdit = false" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
             <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" @click="modalEdit = false"></div>
             <div class="relative bg-white dark:bg-slate-900 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-200">
                 <div class="p-6">
@@ -193,11 +193,11 @@
                 text: "Data tagihan yang sudah terbit di warga tidak akan hilang.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#e11d48',
-                cancelButtonColor: '#64748b',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
                 confirmButtonText: 'Ya, Hapus!',
                 cancelButtonText: 'Batal',
-                customClass: { popup: 'rounded-2xl', confirmButton: 'rounded-xl px-5 py-2.5 text-sm font-bold', cancelButton: 'rounded-xl px-5 py-2.5 text-sm font-bold' }
+                reverseButtons: true
             }).then((result) => { 
                 if (result.isConfirmed) {
                     const form = document.getElementById(`delete-form-${id}`);

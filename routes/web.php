@@ -9,17 +9,8 @@ use App\Http\Controllers\KasController;
 use App\Http\Controllers\VerifikasiController;
 use App\Http\Controllers\ExpenditureController;
 use App\Http\Controllers\TagihanWargaController;
-use App\Http\Controllers\InfaqController;
-use App\Http\Controllers\MesjidPaymentController;
-use App\Http\Controllers\MesjidExpenditureController;
-use App\Http\Controllers\MesjidLaporanController;
-use App\Http\Controllers\MesjidDashboardController;
-use App\Http\Controllers\KoperasiController;
-use App\Http\Controllers\KoperasiPaymentController;
-use App\Http\Controllers\KoperasiWargaController;
-use App\Http\Controllers\KoperasiLaporanController;
-use App\Http\Controllers\KoperasiDashboardController;
 use App\Http\Controllers\RtDashboardController;
+use App\Http\Controllers\StatistikWargaController;
 use App\Http\Controllers\BendaharaDashboardController;
 use App\Http\Controllers\WargaDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -53,13 +44,7 @@ Route::get('/dashboard', function () {
         return app(WargaDashboardController::class)->index();
     }
             
-    if ($role === 'mesjid') {
-        return app(MesjidDashboardController::class)->index();
-    }
 
-    if ($role === 'koperasi') {
-        return app(KoperasiDashboardController::class)->index();
-    }
 
     if (view()->exists($role . '.dashboard')) {
         return view($role . '.dashboard');
@@ -98,13 +83,13 @@ Route::middleware(['auth', 'role:rt,bendahara,superadmin'])->group(function () {
     Route::get('/laporan/kas', [KasController::class, 'index'])->name('laporan.kas');
     Route::get('/laporan/iuran-warga', [KasController::class, 'iuranWarga'])->name('laporan.iuran');
     Route::get('/tagihan/warga', [TagihanWargaController::class, 'index'])->name('tagihan.warga');
+    Route::get('/statistik-warga', [StatistikWargaController::class, 'index'])->name('statistik.warga');
 });
 
 // 4. GRUP AKSES WARGA (Warga & Superadmin)
 Route::middleware(['auth', 'role:warga,superadmin'])->group(function () {  
     Route::get('/my-iuran', [IuranController::class, 'wargaIndex'])->name('warga.iuran');
     Route::post('/my-iuran/bayar/{id}', [IuranController::class, 'bayar'])->name('warga.bayar'); 
-    Route::post('/my-iuran/bayar-koperasi/{id}', [IuranController::class, 'bayarPakaiKoperasi'])->name('warga.bayar.koperasi');
 
     Route::get('/my-family', [UserController::class, 'profileWarga'])->name('warga.profile');
     Route::post('/my-family/update-profile', [UserController::class, 'updateProfileWarga'])->name('warga.profile.update');
@@ -115,44 +100,6 @@ Route::middleware(['auth', 'role:warga,superadmin'])->group(function () {
     Route::get('/kegiatan-rt', [AgendaController::class, 'wargaIndex'])->name('warga.agendas');
 
     Route::get('/transparansi/dana', [ExpenditureController::class, 'wargaIndex'])->name('warga.transparansi');
-    
-    Route::get('/infaq-saya', [InfaqController::class, 'index'])->name('warga.infaq');
-    Route::post('/infaq-saya/store', [InfaqController::class, 'store'])->name('warga.infaq.store');
-
-    Route::get('/koperasi/saya', [KoperasiWargaController::class, 'index'])->name('warga.koperasi');
-    Route::post('/koperasi/saya/join', [KoperasiWargaController::class, 'join'])->name('warga.koperasi.join');
-    Route::post('/koperasi/saya/setor', [KoperasiWargaController::class, 'store'])->name('warga.koperasi.store');
-    Route::post('/koperasi/saya/tarik', [KoperasiWargaController::class, 'tarikDana'])->name('warga.koperasi.tarik');
-    Route::post('/koperasi/saya/pinjam', [KoperasiWargaController::class, 'ajukanPinjaman'])->name('warga.koperasi.pinjam');
-    Route::post('/koperasi/saya/cicilan/{id}', [KoperasiWargaController::class, 'bayarCicilan'])->name('warga.koperasi.cicilan');
-    Route::post('/koperasi/saya/cicilan-saldo/{id}', [KoperasiWargaController::class, 'bayarCicilanPakaiSaldo'])->name('warga.koperasi.cicilan.saldo');
-});
-
-// 5. GRUP AKSES PENGURUS MESJID (Mesjid & Superadmin)
-Route::middleware(['auth', 'role:mesjid,superadmin'])->group(function () {
-    Route::get('/mesjid/dashboard', [MesjidDashboardController::class, 'index'])->name('mesjid.dashboard');
-    Route::get('/mesjid/payment', [MesjidPaymentController::class, 'index'])->name('mesjid.payment');
-    Route::post('/mesjid/payment', [MesjidPaymentController::class, 'store'])->name('mesjid.payment.store');
-    Route::get('/mesjid/pengeluaran', [MesjidExpenditureController::class, 'index'])->name('mesjid.pengeluaran');
-    Route::post('/mesjid/pengeluaran', [MesjidExpenditureController::class, 'store'])->name('mesjid.pengeluaran.store');
-    Route::delete('/mesjid/pengeluaran/{id}', [MesjidExpenditureController::class, 'destroy'])->name('mesjid.pengeluaran.destroy');
-    Route::get('/mesjid/laporan', [MesjidLaporanController::class, 'index'])->name('mesjid.laporan');
-});
-
-// 6. GRUP AKSES KOPERASI (Koperasi & Superadmin)
-Route::middleware(['auth', 'role:koperasi,superadmin'])->group(function () {
-    Route::get('/koperasi/dashboard', [KoperasiDashboardController::class, 'index'])->name('koperasi.admin.index');
-    Route::get('/koperasi/setting-pembayaran', [KoperasiPaymentController::class, 'index'])->name('koperasi.admin.payment');
-    Route::post('/koperasi/setting-pembayaran', [KoperasiPaymentController::class, 'store'])->name('koperasi.admin.payment.store');
-    Route::get('/koperasi/transaksi', [KoperasiController::class, 'transaksi'])->name('koperasi.admin.transaksi');
-    Route::get('/koperasi/anggota', [KoperasiController::class, 'anggota'])->name('koperasi.admin.anggota');
-    Route::post('/koperasi/verify/{id}', [KoperasiController::class, 'verify'])->name('koperasi.admin.verify');
-    Route::post('/koperasi/reject/{id}', [KoperasiController::class, 'reject'])->name('koperasi.admin.reject');
-    Route::get('/koperasi/kasbon', [KoperasiController::class, 'kasbon'])->name('koperasi.admin.kasbon');
-    Route::post('/koperasi/kasbon/{id}/approve', [KoperasiController::class, 'approveKasbon'])->name('koperasi.admin.approve_kasbon');
-    Route::post('/koperasi/cicilan/{id}/verify', [KoperasiController::class, 'verifyCicilan'])->name('koperasi.admin.verify_cicilan');
-    Route::post('/koperasi/cicilan/{id}/reject', [KoperasiController::class, 'rejectCicilan'])->name('koperasi.admin.reject_cicilan');
-    Route::get('/koperasi/laporan-kas', [KoperasiLaporanController::class, 'index'])->name('koperasi.laporan.kas');
 });
 
 // 7. PROFILE BAWAAN LARAVEL BREEZE

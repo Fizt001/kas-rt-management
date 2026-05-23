@@ -14,13 +14,14 @@ class UserController extends Controller
     public function index(Request $request)
 {
     // Filter berdasarkan nama jika ada input search
-    $users = \App\Models\User::when($request->search, function ($query, $search) {
-        return $query->where('name', 'like', "%{$search}%");
-    })
-    ->orderBy('role', 'asc')
-    ->orderBy('name', 'asc')
-    ->paginate(15) // Batasi 15 data per halaman
-    ->withQueryString(); // Menjaga parameter ?search saat pindah halaman
+    $users = \App\Models\User::with('familyMembers')
+        ->when($request->search, function ($query, $search) {
+            return $query->where('name', 'like', "%{$search}%");
+        })
+        ->orderBy('role', 'asc')
+        ->orderBy('name', 'asc')
+        ->paginate(15) // Batasi 15 data per halaman
+        ->withQueryString(); // Menjaga parameter ?search saat pindah halaman
 
     return view('superadmin.users.index', compact('users'));
 }
@@ -34,6 +35,11 @@ class UserController extends Controller
             'role' => 'required|in:superadmin,rt,bendahara,warga,mesjid,koperasi',
             'foto' => 'nullable|image|max:2048'
         ]);
+
+        $restrictedRoles = ['superadmin', 'rt', 'bendahara'];
+        if (in_array($request->role, $restrictedRoles) && auth()->user()->role !== 'superadmin') {
+            abort(403, 'Hanya Superadmin yang dapat membuat role ini.');
+        }
 
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
@@ -57,6 +63,16 @@ class UserController extends Controller
             'password' => 'nullable|min:8',
         ]);
 
+        $restrictedRoles = ['superadmin', 'rt', 'bendahara'];
+        if (auth()->user()->role !== 'superadmin') {
+            if (in_array($user->role, $restrictedRoles)) {
+                abort(403, 'Anda tidak dapat memodifikasi akun administrator.');
+            }
+            if (in_array($request->role, $restrictedRoles)) {
+                abort(403, 'Anda tidak dapat memberikan akses administrator.');
+            }
+        }
+
         $user->name = $request->name;
         $user->email = $request->email;
         $user->role = $request->role;
@@ -72,6 +88,11 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
+        
+        $restrictedRoles = ['superadmin', 'rt', 'bendahara'];
+        if (in_array($user->role, $restrictedRoles) && auth()->user()->role !== 'superadmin') {
+            abort(403, 'Anda tidak dapat menghapus akun administrator.');
+        }
         if ($user->foto) {
             Storage::disk('public')->delete($user->foto);
         }
@@ -203,11 +224,29 @@ class UserController extends Controller
         // 1. Validasi input
         $request->validate([
             'target_user_id' => 'required|exists:users,id',
+            'blok_rumah'     => 'nullable|string|max:10',
             'no_rumah'       => 'nullable|string|max:50',
             'no_kk'          => 'nullable|string|max:30',
             'nik'            => 'nullable|string|max:30',
             'tanggal_lahir'  => 'nullable|date',
         ]);
+
+        // Hilangkan spasi agar formatnya benar-benar standar (misal "E 1" jadi "E1")
+        $blokRumah = str_replace(' ', '', strtoupper($request->blok_rumah));
+        $noRumah = str_replace(' ', '', strtoupper($request->no_rumah));
+
+        // Validasi Unique Kombinasi Blok + No Rumah
+        if ($blokRumah && $noRumah) {
+            $existingUser = User::where('blok_rumah', $blokRumah)
+                                ->where('no_rumah', $noRumah)
+                                ->where('id', '!=', $request->target_user_id)
+                                ->where('role', 'warga')
+                                ->first();
+            
+            if ($existingUser) {
+                return back()->with('error', "Gagal! Rumah dengan Blok {$blokRumah} / No. {$noRumah} sudah diklaim oleh warga lain.");
+            }
+        }
 
         // 2. Cek Otorisasi: warga hanya boleh update profil dirinya sendiri
         $targetId = $request->target_user_id;
@@ -220,7 +259,8 @@ class UserController extends Controller
 
         // 4. Update data ke tabel USERS
         $user->update([
-            'no_rumah' => strtoupper($request->no_rumah), // Biar otomatis huruf kapital
+            'blok_rumah' => $blokRumah,
+            'no_rumah' => $noRumah,
             'no_kk'    => $request->no_kk,
             'nik'      => $request->nik,
             'tanggal_lahir' => $request->tanggal_lahir,

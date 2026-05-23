@@ -86,28 +86,6 @@
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2.5rem] p-6 text-white shadow-xl shadow-emerald-200 dark:shadow-none group relative overflow-hidden">
-                    <svg class="absolute -right-4 -bottom-4 opacity-20 size-24 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    <div class="relative z-10">
-                        <p class="text-[9px] font-black uppercase text-emerald-100 tracking-widest mb-1">Amal Jariyah Saya</p>
-                        <h4 class="text-2xl font-black">Rp{{ number_format($totalInfaq ?? 0, 0, ',', '.') }}</h4>
-                        <div class="mt-4">
-                            <a href="{{ route('warga.infaq') }}" class="text-[8px] font-black uppercase bg-white/20 hover:bg-white/30 px-5 py-2 rounded-full transition-all inline-block border border-white/10 tracking-widest">Tunaikan Infaq</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[2.5rem] p-6 text-white shadow-xl shadow-amber-200 dark:shadow-none group relative overflow-hidden">
-                    <svg class="absolute -right-4 -bottom-4 opacity-20 size-24 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <div class="relative z-10">
-                        <p class="text-[9px] font-black uppercase text-amber-100 tracking-widest mb-1">Tabungan Koperasi</p>
-                        <h4 class="text-2xl font-black">Rp{{ number_format($totalTabungan ?? 0, 0, ',', '.') }}</h4>
-                        <div class="mt-4">
-                            <a href="{{ route('warga.koperasi') }}" class="text-[8px] font-black uppercase bg-white/20 hover:bg-white/30 px-5 py-2 rounded-full transition-all inline-block border border-white/10 tracking-widest">Akses Koperasi</a>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>

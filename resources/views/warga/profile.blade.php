@@ -7,6 +7,15 @@
         </div>
     </x-slot>
 
+    @php
+        function maskNikKk($str) {
+            if (!$str) return '-';
+            $len = strlen($str);
+            if ($len <= 8) return str_repeat('*', $len);
+            return substr($str, 0, 4) . str_repeat('*', $len - 8) . substr($str, -4);
+        }
+    @endphp
+
     <div x-data="{ 
         showModalAdd: false,
         showModalEdit: false,
@@ -60,9 +69,15 @@
                 <input type="hidden" name="no_kk" value="{{ $targetUser->no_kk }}">
                 <input type="hidden" name="nik" value="{{ $targetUser->nik }}">
                 
-                <div class="w-full lg:w-64">
-                    <label class="text-[10px] font-black text-blue-100 uppercase tracking-widest block mb-1">No. Rumah / Blok</label>
-                    <input type="text" name="no_rumah" value="{{ $targetUser->no_rumah }}" placeholder="Contoh: A-12" class="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 rounded-lg py-2 px-3 text-xs sm:text-sm font-bold focus:ring-2 focus:ring-white h-10 uppercase">
+                <div class="flex gap-2 w-full lg:w-auto">
+                    <div class="w-full lg:w-32">
+                        <label class="text-[10px] font-black text-blue-100 uppercase tracking-widest block mb-1">Blok</label>
+                        <input type="text" name="blok_rumah" value="{{ $targetUser->blok_rumah }}" placeholder="Cth: E1" class="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 rounded-lg py-2 px-3 text-xs sm:text-sm font-bold focus:ring-2 focus:ring-white h-10 uppercase">
+                    </div>
+                    <div class="w-full lg:w-32">
+                        <label class="text-[10px] font-black text-blue-100 uppercase tracking-widest block mb-1">No. Rumah</label>
+                        <input type="text" name="no_rumah" value="{{ $targetUser->no_rumah }}" placeholder="Cth: 01" class="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 rounded-lg py-2 px-3 text-xs sm:text-sm font-bold focus:ring-2 focus:ring-white h-10 uppercase">
+                    </div>
                 </div>
                 <div class="mt-2 lg:mt-0 w-full lg:w-auto">
                     <button type="submit" class="w-full px-6 py-2.5 bg-white text-blue-600 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-all shadow-sm active:scale-95 h-10">
@@ -76,13 +91,14 @@
             $groupedMembers = $targetUser->familyMembers->groupBy(function($item) {
                 return $item->kelompok_kk ?: 'KK Utama';
             });
-            // Ensure KK Utama is always the first group
-            if ($groupedMembers->has('KK Utama')) {
-                $utama = $groupedMembers->pull('KK Utama');
-                $groupedMembers->prepend($utama, 'KK Utama');
-            } elseif ($targetUser->familyMembers->isEmpty()) {
+            // Ensure KK Utama always exists
+            if (!$groupedMembers->has('KK Utama')) {
                 $groupedMembers->put('KK Utama', collect());
             }
+            
+            // Move KK Utama to the front
+            $utama = $groupedMembers->pull('KK Utama');
+            $groupedMembers->prepend($utama, 'KK Utama');
         @endphp
 
         @foreach($groupedMembers as $kelompok => $members)
@@ -126,8 +142,8 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-xs font-bold text-slate-500">
-                                    NIK: {{ $targetUser->nik ?? '-' }}<br>
-                                    <span class="text-[9px] text-slate-400 font-medium">KK: {{ $targetUser->no_kk ?? '-' }}</span>
+                                    NIK: {{ maskNikKk($targetUser->nik) }}<br>
+                                    <span class="text-[9px] text-slate-400 font-medium">KK: {{ maskNikKk($targetUser->no_kk) }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex justify-end gap-1.5">
@@ -151,21 +167,21 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-xs font-bold text-slate-500">
-                                    NIK: {{ $anggota->nik ?? '-' }}<br>
+                                    NIK: {{ maskNikKk($anggota->nik) }}<br>
                                     @if($kelompok !== 'KK Utama' && $anggota->status_hubungan === 'Kepala Keluarga')
-                                    <span class="text-[9px] text-slate-400 font-medium">KK: {{ $anggota->no_kk_kelompok ?? '-' }}</span>
+                                    <span class="text-[9px] text-slate-400 font-medium">KK: {{ maskNikKk($anggota->no_kk_kelompok) }}</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex justify-end gap-1.5">
-                                        <button type="button" @click="editUrl = '{{ route('warga.family.update', $anggota->id) }}'; editNama = '{{ addslashes($anggota->nama) }}'; editStatus = '{{ $anggota->status_hubungan }}'; editNik = '{{ $anggota->nik }}'; editKelompokKk = '{{ $anggota->kelompok_kk ?: 'KK Utama' }}'; editNoKk = '{{ $anggota->no_kk_kelompok }}'; editTanggalLahir = '{{ $anggota->tanggal_lahir }}'; showModalEdit = true" class="text-blue-600 hover:text-blue-800 bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg transition-colors">
+                                        <button type="button" @click="editUrl = '{{ route('warga.family.update', $anggota->id) }}'; editNama = '{{ addslashes($anggota->nama) }}'; editStatus = '{{ $anggota->status_hubungan }}'; editNik = '{{ $anggota->nik }}'; editKelompokKk = '{{ $anggota->kelompok_kk ?: 'KK Utama' }}'; editNoKk = '{{ $anggota->no_kk_kelompok }}'; editTanggalLahir = '{{ $anggota->tanggal_lahir }}'; showModalEdit = true" class="p-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                         </button>
                                         
-                                        <form action="{{ route('warga.family.destroy', $anggota->id) }}" method="POST" onsubmit="return confirm('Hapus data anggota keluarga ini?');" class="inline">
+                                        <form id="delete-anggota-{{ $anggota->id }}" action="{{ route('warga.family.destroy', $anggota->id) }}" method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-rose-600 hover:text-rose-800 bg-rose-50 dark:bg-rose-900/30 p-2 rounded-lg transition-colors">
+                                            <button type="button" onclick="confirmDeleteAnggota('{{ $anggota->id }}')" class="p-2 text-rose-600 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-100">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             </button>
                                         </form>
@@ -185,7 +201,7 @@
         </div>
         @endforeach
 
-        <div x-show="showModalAdd" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
+        <div x-show="showModalAdd" @keydown.window.escape="showModalAdd = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalAdd = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4">
                 <div x-show="showModalAdd" x-transition class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 z-10 shadow-2xl">
@@ -244,7 +260,7 @@
             </div>
         </div>
 
-        <div x-show="showModalEdit" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
+        <div x-show="showModalEdit" @keydown.window.escape="showModalEdit = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalEdit = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4">
                 <div x-show="showModalEdit" x-transition class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 z-10 shadow-2xl">
@@ -302,7 +318,7 @@
             </div>
         </div>
 
-        <div x-show="showModalEditKepala" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
+        <div x-show="showModalEditKepala" @keydown.window.escape="showModalEditKepala = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalEditKepala = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4">
                 <div x-show="showModalEditKepala" x-transition class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 z-10 shadow-2xl">
@@ -310,6 +326,7 @@
                     <form action="{{ route('warga.profile.update') }}" method="POST" class="space-y-4">
                         @csrf
                         <input type="hidden" name="target_user_id" value="{{ $targetUser->id }}">
+                        <input type="hidden" name="blok_rumah" value="{{ $targetUser->blok_rumah }}">
                         <input type="hidden" name="no_rumah" value="{{ $targetUser->no_rumah }}">
                         
                         <div>
@@ -340,4 +357,26 @@
         </div>
 
     </div>
+
+    @push('scripts')
+        <script>
+            function confirmDeleteAnggota(id) {
+                Swal.fire({
+                    title: 'Hapus Anggota Keluarga?',
+                    text: 'Data anggota keluarga ini akan dihapus secara permanen.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#94a3b8',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-anggota-' + id).submit();
+                    }
+                })
+            }
+        </script>
+    @endpush
 </x-app-layout>

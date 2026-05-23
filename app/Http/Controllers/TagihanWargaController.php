@@ -36,25 +36,22 @@ class TagihanWargaController extends Controller
         $bulanIni  = $bulanInt;
 
         $rekap = User::where('role', 'warga')
+            ->with(['billings' => function($q) use ($bulanInt, $tahunIni) {
+                $q->where('bulan', $bulanInt)->where('tahun', $tahunIni);
+            }])
+            ->withSum(['billings as total_tunggakan' => function($q) {
+                $q->whereIn('status', ['belum_lunas', 'pending']);
+            }], 'total_amount')
             ->orderBy('name', 'asc')
             ->paginate(14)
-            ->through(function ($u) use ($bulanInt, $tahunIni) {
-                
-                $billingBulanIni = Billing::where('user_id', $u->id)
-                    ->where('bulan', $bulanInt)   // integer langsung
-                    ->where('tahun', $tahunIni)
-                    ->first();
-
-                $totalTunggakan = Billing::where('user_id', $u->id)
-                    ->whereIn('status', ['belum_lunas', 'pending'])
-                    ->sum('total_amount');
-
+            ->through(function ($u) {
+                $billingBulanIni = $u->billings->first();
                 return [
                     'id'              => $u->id,
                     'nama'            => $u->name,
                     'no_rumah'        => $u->no_rumah ?? '-', 
                     'status_sekarang' => $billingBulanIni->status ?? 'belum_ada',
-                    'total_tunggakan' => $totalTunggakan,
+                    'total_tunggakan' => $u->total_tunggakan ?? 0,
                     'wa_phone'        => $u->phone,
                 ];
             });

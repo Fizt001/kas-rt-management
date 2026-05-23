@@ -21,9 +21,21 @@
         },
 
         confirmDelete(id) {
-            if (confirm('Hapus user ini secara permanen?')) {
-                document.getElementById('delete-form-' + id).submit();
-            }
+            Swal.fire({
+                title: 'Hapus User Permanen?',
+                text: 'Semua data yang terkait dengan user ini akan dihapus secara permanen!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
         }
     }" class="p-5 space-y-4 pb-10 relative">
 
@@ -85,19 +97,29 @@
                                 </span>
                             </td>
                             <td class="px-6 py-3.5 text-right">
-                                <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                                    <button type="button" @click="openEditModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ $u->email }}', '{{ $u->role }}')" 
-                                        class="p-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100">
-                                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
-                                    </button>
-                                    <form id="delete-form-{{ $u->id }}" action="{{ route('users.destroy', $u->id) }}" method="POST" class="inline">
-                                        @csrf @method('DELETE')
-                                        <button type="button" @click="confirmDelete('{{ $u->id }}')" 
-                                            class="p-2 text-rose-600 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-100">
-                                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14.74 9l-.34 12m-4.78 0-.34-12m10.32-4.74l-.38 3.42a2 2 0 0 1-1.99 1.74H6.42a2 2 0 0 1-1.99-1.74l-.38-3.42"/></svg>
+                                @php
+                                    $isRestricted = in_array(strtolower($u->role), ['superadmin', 'rt', 'bendahara']);
+                                    $canManage = auth()->user()->role === 'superadmin' || !$isRestricted;
+                                @endphp
+                                @if($canManage)
+                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                        <button type="button" @click="openEditModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ $u->email }}', '{{ $u->role }}')" 
+                                            class="p-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors">
+                                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                                         </button>
-                                    </form>
-                                </div>
+                                        <form id="delete-form-{{ $u->id }}" action="{{ route('users.destroy', $u->id) }}" method="POST" class="inline">
+                                            @csrf @method('DELETE')
+                                            <button type="button" @click="confirmDelete('{{ $u->id }}')" 
+                                                class="p-2 text-rose-600 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-100 hover:bg-rose-100 transition-colors">
+                                                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14.74 9l-.34 12m-4.78 0-.34-12m10.32-4.74l-.38 3.42a2 2 0 0 1-1.99 1.74H6.42a2 2 0 0 1-1.99-1.74l-.38-3.42"/></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @else
+                                    <div class="flex justify-end opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                        <span class="text-[9px] font-bold text-slate-400 italic px-2 py-1">Protected</span>
+                                    </div>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -117,7 +139,7 @@
 
         </div>
 
-        <div x-show="showModalCreate" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
+        <div x-show="showModalCreate" @keydown.window.escape="showModalCreate = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
             <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="showModalCreate = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0 relative">
                 <div x-show="showModalCreate" class="relative bg-white border border-slate-200 shadow-2xl rounded-xl w-full max-w-md p-6 text-left transform transition-all dark:bg-slate-900 dark:border-slate-800">
@@ -158,7 +180,7 @@
             </div>
         </div>
 
-        <div x-show="showModalEdit" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
+        <div x-show="showModalEdit" @keydown.window.escape="showModalEdit = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
             <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="showModalEdit = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0 relative">
                 <div x-show="showModalEdit" class="relative bg-white border border-slate-200 shadow-xl rounded-xl w-full max-w-md p-6 text-left transform transition-all dark:bg-slate-900 dark:border-slate-800">
@@ -197,4 +219,7 @@
         </div>
 
     </div>
+
+    @push('scripts')
+    @endpush
 </x-app-layout>

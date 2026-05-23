@@ -61,7 +61,8 @@
                             <tr class="bg-slate-50 dark:bg-slate-800/50 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-slate-100 dark:border-slate-800">
                                 <th class="px-4 py-3 whitespace-nowrap">Nama Kegiatan</th>
                                 <th class="px-4 py-3 whitespace-nowrap">Tanggal & Lokasi</th>
-                                <th class="px-4 py-3 text-center whitespace-nowrap">Status</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-right">Dana Terpakai</th>
+                                <th class="px-4 py-3 text-center whitespace-nowrap">Laporan Bukti</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50 dark:divide-slate-800">
@@ -75,8 +76,29 @@
                                     <p class="text-xs font-bold text-slate-600 dark:text-slate-400">{{ \Carbon\Carbon::parse($selesai->tanggal)->translatedFormat('d M Y') }}</p>
                                     <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{{ $selesai->lokasi ?? '-' }}</p>
                                 </td>
+                                <td class="px-4 py-3 text-right">
+                                    @if($selesai->status === 'batal')
+                                        <span class="text-[9px] font-black text-rose-600 bg-rose-100 px-2 py-1 rounded-md uppercase border border-rose-200">Batal</span>
+                                    @elseif($selesai->realisasi_dana)
+                                        <span class="text-xs font-black text-rose-500">- Rp{{ number_format($selesai->realisasi_dana, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="text-[10px] font-bold text-slate-400 italic">Rp 0</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-center whitespace-nowrap">
-                                    <span class="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-md text-[8px] font-black uppercase border border-emerald-100">Selesai</span>
+                                    <div class="flex items-center justify-center gap-2">
+                                        @if($selesai->status === 'batal')
+                                            <span class="text-[8px] font-bold text-rose-400 italic border-b border-rose-200">Tidak ada laporan</span>
+                                        @elseif($selesai->bukti_kegiatan)
+                                            <a href="{{ asset('storage/' . $selesai->bukti_kegiatan) }}" target="_blank" class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md text-[8px] font-black uppercase border border-blue-100 hover:bg-blue-100" title="Foto Kegiatan">📸 Foto</a>
+                                        @endif
+                                        @if($selesai->status !== 'batal' && $selesai->nota_belanja)
+                                            <a href="{{ asset('storage/' . $selesai->nota_belanja) }}" target="_blank" class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-md text-[8px] font-black uppercase border border-amber-100 hover:bg-amber-100" title="Nota Belanja">🧾 Nota</a>
+                                        @endif
+                                        @if($selesai->status !== 'batal' && !$selesai->bukti_kegiatan && !$selesai->nota_belanja)
+                                            <span class="text-[8px] font-bold text-slate-400 italic">Belum Ada</span>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach

@@ -17,20 +17,6 @@ return new class extends Migration
             $table->index('status', 'billings_status_idx');
         });
 
-        // Index pada koperasi_transactions: sering filter by user & status
-        Schema::table('koperasi_transactions', function (Blueprint $table) {
-            $table->index(['user_id', 'status'], 'koperasi_trx_user_status_idx');
-        });
-
-        // Index pada koperasi_loans: sering filter by user & status
-        Schema::table('koperasi_loans', function (Blueprint $table) {
-            $table->index(['user_id', 'status'], 'koperasi_loans_user_status_idx');
-        });
-
-        // Index pada koperasi_loan_installments: sering filter by loan & status
-        Schema::table('koperasi_loan_installments', function (Blueprint $table) {
-            $table->index(['koperasi_loan_id', 'status'], 'koperasi_inst_loan_status_idx');
-        });
     }
 
     /**
@@ -43,16 +29,5 @@ return new class extends Migration
             $table->dropIndex('billings_status_idx');
         });
 
-        Schema::table('koperasi_transactions', function (Blueprint $table) {
-            $table->dropIndex('koperasi_trx_user_status_idx');
-        });
-
-        Schema::table('koperasi_loans', function (Blueprint $table) {
-            $table->dropIndex('koperasi_loans_user_status_idx');
-        });
-
-        Schema::table('koperasi_loan_installments', function (Blueprint $table) {
-            $table->dropIndex('koperasi_inst_loan_status_idx');
-        });
     }
 };

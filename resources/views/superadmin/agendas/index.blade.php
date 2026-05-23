@@ -78,9 +78,15 @@
                         </td>
                         <td class="px-6 py-3.5 text-right">
                             <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                                <button @click="openEditModal('{{ $a->id }}', '{{ addslashes($a->judul) }}', '{{ addslashes($a->deskripsi) }}', '{{ $a->tanggal }}', '{{ $a->waktu }}', '{{ addslashes($a->lokasi) }}', '{{ $a->status }}')" class="p-2 text-blue-600 bg-blue-50 rounded-lg border border-blue-100">
+                                <button @click="openEditModal('{{ $a->id }}', '{{ addslashes($a->judul) }}', '{{ addslashes($a->deskripsi) }}', '{{ $a->tanggal }}', '{{ $a->waktu }}', '{{ addslashes($a->lokasi) }}', '{{ $a->status }}')" class="p-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100">
                                     <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                                 </button>
+                                <form id="delete-form-{{ $a->id }}" action="{{ route('agendas.destroy', $a->id) }}" method="POST" class="inline">
+                                    @csrf @method('DELETE')
+                                    <button type="button" onclick="confirmDeleteAgenda('{{ $a->id }}')" class="p-2 text-rose-600 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-100 hover:bg-rose-100 transition-colors" title="Hapus">
+                                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14.74 9l-.34 12m-4.78 0-.34-12m10.32-4.74l-.38 3.42a2 2 0 0 1-1.99 1.74H6.42a2 2 0 0 1-1.99-1.74l-.38-3.42"/></svg>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -91,7 +97,96 @@
             </table>
         </div>
 
-        <div x-show="showModalReschedule" style="display: none;" class="fixed inset-0 z-[110] overflow-y-auto" x-cloak>
+        <!-- Modal Create -->
+        <div x-show="showModalCreate" @keydown.window.escape="showModalCreate = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalCreate = false"></div>
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div x-show="showModalCreate" x-transition class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-3xl w-full max-w-lg p-6 lg:p-8">
+                    <h3 class="text-xl font-black text-slate-800 dark:text-white mb-6 uppercase tracking-tight">Tambah <span class="text-blue-600">Agenda</span></h3>
+                    <form action="{{ route('agendas.store') }}" method="POST" class="space-y-5">
+                        @csrf
+                        <input type="hidden" name="status" value="aktif">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Judul Agenda</label>
+                            <input type="text" name="judul" required class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Deskripsi Singkat</label>
+                            <textarea name="deskripsi" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-blue-600 resize-none dark:text-white"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Tanggal</label>
+                                <input type="date" name="tanggal" required class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Waktu (Jam)</label>
+                                <input type="time" name="waktu" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Lokasi / Tempat</label>
+                            <input type="text" name="lokasi" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                        </div>
+                        <div class="pt-4 flex gap-3">
+                            <button type="button" @click="showModalCreate = false" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all">Batal</button>
+                            <button type="submit" class="flex-[2] py-3.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-200 dark:shadow-none hover:bg-blue-700 active:scale-95 transition-all">Simpan Agenda</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Edit -->
+        <div x-show="showModalEdit" @keydown.window.escape="showModalEdit = false" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalEdit = false"></div>
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div x-show="showModalEdit" x-transition class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-3xl w-full max-w-lg p-6 lg:p-8">
+                    <h3 class="text-xl font-black text-slate-800 dark:text-white mb-6 uppercase tracking-tight">Edit <span class="text-blue-600">Agenda</span></h3>
+                    <form :action="editFormAction" method="POST" class="space-y-5">
+                        @csrf @method('PUT')
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Judul Agenda</label>
+                            <input type="text" name="judul" id="edit_judul" required class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Deskripsi Singkat</label>
+                            <textarea name="deskripsi" id="edit_deskripsi" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-blue-600 resize-none dark:text-white"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Tanggal</label>
+                                <input type="date" name="tanggal" id="edit_tanggal" required class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Waktu (Jam)</label>
+                                <input type="time" name="waktu" id="edit_waktu" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Lokasi / Tempat</label>
+                                <input type="text" name="lokasi" id="edit_lokasi" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Status</label>
+                                <select name="status" id="edit_status" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 dark:text-white">
+                                    <option value="aktif">Aktif</option>
+                                    <option value="selesai">Selesai</option>
+                                    <option value="batal">Batal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="pt-4 flex gap-3">
+                            <button type="button" @click="showModalEdit = false" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all">Batal</button>
+                            <button type="submit" class="flex-[2] py-3.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-200 dark:shadow-none hover:bg-blue-700 active:scale-95 transition-all">Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="showModalReschedule" @keydown.window.escape="showModalReschedule = false" style="display: none;" class="fixed inset-0 z-[110] overflow-y-auto" x-cloak>
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModalReschedule = false"></div>
             <div class="flex items-center justify-center min-h-screen p-4">
                 <div x-show="showModalReschedule" class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl w-full max-w-sm p-6 text-left">
@@ -111,47 +206,28 @@
             </div>
         </div>
 
-        @php $roleNormalized = strtolower(str_replace(' ', '', auth()->user()->role)); @endphp
 
-        @if(in_array($roleNormalized, ['rt', 'superadmin']) && $expiredAgendas->count() > 0)
-            <script>
-                document.addEventListener('DOMContentLoaded', async () => {
-                    const expired = @json($expiredAgendas);
-                    
-                    // Loop lewat Javascript agar muncul berurutan (Queue)
-                    for (const agenda of expired) {
-                        const { value: action } = await Swal.fire({
-                            title: 'Agenda Terlewat!',
-                            html: `Agenda <b>${agenda.judul}</b> sudah lewat jadwal.<br><small class="text-slate-400">Jadwal asli: ${agenda.tanggal}</small>`,
-                            icon: 'warning',
-                            showDenyButton: true,
-                            showCancelButton: true,
-                            confirmButtonText: 'Selesai',
-                            denyButtonText: 'Tunda',
-                            cancelButtonText: 'Abaikan',
-                            confirmButtonColor: '#10b981',
-                            denyButtonColor: '#f59e0b',
-                        });
-
-                        if (action) {
-                            // Jika klik Selesai
-                            document.getElementById(`form-selesai-${agenda.id}`).submit();
-                            break; // Berhenti dulu karena halaman akan refresh
-                        } else if (Swal.getDenyButton() === document.activeElement) {
-                            // Jika klik Tunda
-                            window.dispatchEvent(new CustomEvent('open-reschedule', { detail: { id: agenda.id } }));
-                            break; // Buka modal tunda
-                        }
-                    }
-                });
-            </script>
-
-            @foreach($expiredAgendas as $expired)
-                <form id="form-selesai-{{ $expired->id }}" action="{{ route('agendas.update-status', $expired->id) }}" method="POST" class="hidden">
-                    @csrf @method('PATCH')
-                    <input type="hidden" name="status" value="selesai">
-                </form>
-            @endforeach
-        @endif
     </div>
+
+    @push('scripts')
+        <script>
+            function confirmDeleteAgenda(id) {
+                Swal.fire({
+                    title: 'Hapus Agenda?',
+                    text: 'Agenda ini akan dihapus secara permanen!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#94a3b8',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-form-' + id).submit();
+                    }
+                })
+            }
+        </script>
+    @endpush
 </x-app-layout>
