@@ -47,6 +47,15 @@ Aplikasi Manajemen Lingkungan Terpadu (Iuran & Kegiatan Warga)
 
 ---
 
+## 📱 Filosofi Desain: Mobile-First DNA (Nyaman di HP)
+KAS-RT Digital dirancang dengan memprioritaskan pengalaman visual yang premium dan mantap saat diakses melalui *smartphone* (HP):
+* **Anti Geser Samping (*No Horizontal Scroll*)**: Tidak ada lagi tabel data kaku yang mengharuskan warga menggeser layar ke samping.
+* **DNA *Accordion* (Kartu Lipat Cerdas)**: Data kompleks seperti Anggota Keluarga, Riwayat Kegiatan, dan Laporan Kas disulap menjadi wujud "Kartu" ringkas. Cukup disentuh, kartu akan melipat terbuka ke bawah untuk menyajikan detail (anti-sumpek & elegan).
+* **DNA *Timeline Ledger***: Status tagihan 12 bulan tidak lagi berwujud kotak raksasa, melainkan dirangkum menjadi garis waktu (*timeline*) tipis yang menawan layaknya riwayat transaksi bank kelas atas.
+* **Bunglon Responsif**: Walaupun sangat memanjakan pengguna HP, jika Pengurus RT mengaksesnya via Laptop/PC, maka "Tabel Besar" yang utuh otomatis kembali ditampilkan demi kelancaran bekerja.
+
+---
+
 ## 💡 Inovasi & Roadmap (Future Plan)
 
 * [ ] **Inventaris RT:** Digitalisasi peminjaman aset (Tenda, Kursi, Sound System).

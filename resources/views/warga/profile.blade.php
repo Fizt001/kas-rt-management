@@ -51,39 +51,41 @@
         </div>
         @endif
 
-        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl shadow-sm p-4 sm:p-5 relative overflow-hidden flex flex-col xl:flex-row gap-5 items-start xl:items-center justify-between">
-            <svg class="absolute -right-4 -top-4 opacity-10 size-32 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <div class="bg-blue-600 dark:bg-slate-800 rounded-xl shadow-md p-3 sm:p-4 relative overflow-hidden flex flex-col xl:flex-row gap-3 sm:gap-4 items-start xl:items-center justify-between text-white">
+            <svg class="absolute -right-4 -top-4 opacity-10 size-24 sm:size-32 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             
-            <div class="relative z-10 w-full xl:w-auto">
-                <p class="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-1">Kepala Keluarga</p>
-                <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">{{ $targetUser->name }}</h2>
-                <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 border border-white/30 text-white rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-sm shadow-sm">
-                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    Total Serumah: {{ $targetUser->familyMembers->count() + 1 }} Jiwa
+            <div class="relative z-10 w-full xl:w-auto flex items-center gap-3">
+                <div class="size-10 sm:size-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <svg class="size-5 sm:size-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div>
+                    <p class="text-[9px] sm:text-[10px] font-black text-blue-200 uppercase tracking-widest mb-0.5">Kepala Keluarga</p>
+                    <h2 class="text-base sm:text-xl font-black text-white tracking-tight leading-none mb-1.5">{{ $targetUser->name }}</h2>
+                    <div class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-white/20 border border-white/30 text-white rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-widest backdrop-blur-sm">
+                        Total: {{ $targetUser->familyMembers->count() + 1 }} Jiwa
+                    </div>
                 </div>
             </div>
 
-            <form action="{{ route('warga.profile.update') }}" method="POST" class="relative z-10 flex flex-col lg:flex-row gap-3 w-full xl:w-auto items-end">
+            <form action="{{ route('warga.profile.update') }}" method="POST" class="relative z-10 w-full xl:w-auto bg-white/10 dark:bg-black/20 p-2.5 sm:p-3 rounded-lg flex flex-col sm:flex-row gap-2 sm:gap-3 items-end sm:items-center">
                 @csrf
                 <input type="hidden" name="target_user_id" value="{{ $targetUser->id }}">
                 <input type="hidden" name="no_kk" value="{{ $targetUser->no_kk }}">
                 <input type="hidden" name="nik" value="{{ $targetUser->nik }}">
                 
-                <div class="flex gap-2 w-full lg:w-auto">
-                    <div class="w-full lg:w-32">
-                        <label class="text-[10px] font-black text-blue-100 uppercase tracking-widest block mb-1">Blok</label>
-                        <input type="text" name="blok_rumah" value="{{ $targetUser->blok_rumah }}" placeholder="Cth: E1" class="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 rounded-lg py-2 px-3 text-xs sm:text-sm font-bold focus:ring-2 focus:ring-white h-10 uppercase">
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <div class="w-full sm:w-24">
+                        <label class="text-[8px] sm:text-[9px] font-black text-blue-200 uppercase tracking-widest block mb-0.5">Blok</label>
+                        <input type="text" name="blok_rumah" value="{{ $targetUser->blok_rumah }}" placeholder="E1" class="w-full bg-white/20 border-none text-white placeholder:text-white/40 rounded-md py-1.5 px-2.5 text-xs font-bold focus:ring-2 focus:ring-white uppercase">
                     </div>
-                    <div class="w-full lg:w-32">
-                        <label class="text-[10px] font-black text-blue-100 uppercase tracking-widest block mb-1">No. Rumah</label>
-                        <input type="text" name="no_rumah" value="{{ $targetUser->no_rumah }}" placeholder="Cth: 01" class="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 rounded-lg py-2 px-3 text-xs sm:text-sm font-bold focus:ring-2 focus:ring-white h-10 uppercase">
+                    <div class="w-full sm:w-24">
+                        <label class="text-[8px] sm:text-[9px] font-black text-blue-200 uppercase tracking-widest block mb-0.5">No Rumah</label>
+                        <input type="text" name="no_rumah" value="{{ $targetUser->no_rumah }}" placeholder="01" class="w-full bg-white/20 border-none text-white placeholder:text-white/40 rounded-md py-1.5 px-2.5 text-xs font-bold focus:ring-2 focus:ring-white uppercase">
                     </div>
                 </div>
-                <div class="mt-2 lg:mt-0 w-full lg:w-auto">
-                    <button type="submit" class="w-full px-6 py-2.5 bg-white text-blue-600 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-all shadow-sm active:scale-95 h-10">
-                        Simpan
-                    </button>
-                </div>
+                <button type="submit" class="w-full sm:w-auto px-4 py-1.5 bg-amber-400 text-slate-900 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-amber-300 transition-all shadow-sm active:scale-95 h-full mt-2 sm:mt-0 self-stretch flex items-center justify-center">
+                    Simpan
+                </button>
             </form>
         </div>
 
@@ -101,25 +103,31 @@
             $groupedMembers->prepend($utama, 'KK Utama');
         @endphp
 
+        <div class="flex justify-end">
+            <button @click="showModalAdd = true" class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-slate-800 dark:bg-slate-700 text-white rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center justify-center gap-2 shadow-md active:scale-95">
+                <svg class="size-4 sm:size-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Tambah Anggota Baru
+            </button>
+        </div>
+
         @foreach($groupedMembers as $kelompok => $members)
         <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 p-4 sm:p-5 mb-5">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-xs sm:text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest flex items-center gap-2">
-                    <svg class="size-4 sm:size-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    Anggota Keluarga: <span class="text-blue-600">{{ $kelompok }}</span>
-                    <span class="ml-2 px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 rounded-full text-[9px] font-black tracking-widest">
-                        Total: {{ $kelompok === 'KK Utama' ? $members->count() + 1 : $members->count() }} Jiwa
-                    </span>
-                </h3>
-                @if($loop->first)
-                <button @click="showModalAdd = true" class="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-1.5 shadow-md">
-                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-                    Tambah
-                </button>
-                @endif
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-start gap-3">
+                    <div class="size-8 sm:size-10 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                        <svg class="size-4 sm:size-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-[10px] sm:text-xs font-black text-slate-800 dark:text-white uppercase tracking-widest leading-tight">
+                            Grup Anggota<br/>
+                            <span class="text-blue-600 text-xs sm:text-sm">{{ $kelompok }}</span>
+                        </h3>
+                        <p class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-md inline-block border border-slate-100 dark:border-slate-700">Total {{ $kelompok === 'KK Utama' ? $members->count() + 1 : $members->count() }} Jiwa</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-left whitespace-nowrap">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black uppercase tracking-widest text-slate-500">
@@ -132,7 +140,7 @@
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                         @if($kelompok === 'KK Utama')
                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors bg-blue-50/20 dark:bg-blue-900/10">
-                                <td class="px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm font-bold text-slate-800 dark:text-slate-200">
                                     {{ $targetUser->name }}<br>
                                     <span class="text-[9px] text-slate-400 font-medium uppercase tracking-widest">{{ $targetUser->tanggal_lahir ? \Carbon\Carbon::parse($targetUser->tanggal_lahir)->format('d M Y') . ' (' . \Carbon\Carbon::parse($targetUser->tanggal_lahir)->age . ' Tahun)' : 'TGL LAHIR: -' }}</span>
                                 </td>
@@ -157,7 +165,7 @@
                         
                         @forelse($members as $anggota)
                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                                <td class="px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm font-bold text-slate-800 dark:text-slate-200">
                                     {{ $anggota->nama }}<br>
                                     <span class="text-[9px] text-slate-400 font-medium uppercase tracking-widest">{{ $anggota->tanggal_lahir ? \Carbon\Carbon::parse($anggota->tanggal_lahir)->format('d M Y') . ' (' . \Carbon\Carbon::parse($anggota->tanggal_lahir)->age . ' Tahun)' : 'TGL LAHIR: -' }}</span>
                                 </td>
@@ -197,6 +205,96 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <!-- MOBILE ACCORDION VIEW -->
+            <div class="sm:hidden space-y-2.5">
+                @if($kelompok === 'KK Utama')
+                    <div x-data="{ expanded: false }" class="flex flex-col bg-blue-50/20 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-slate-800 transition-all overflow-hidden">
+                        <div @click="expanded = !expanded" class="flex flex-row items-center justify-between p-4 cursor-pointer active:bg-slate-50 dark:active:bg-slate-800">
+                            <div class="flex-1 min-w-0 pr-3">
+                                <h4 class="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">{{ $targetUser->name }}</h4>
+                                <span class="text-[9px] font-bold text-blue-600 dark:text-blue-400 mt-0.5 block uppercase tracking-widest">Kepala Keluarga</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <svg class="size-4 text-slate-400 transform transition-transform duration-300" :class="{'rotate-180': expanded}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                        <div x-show="expanded" x-collapse x-cloak>
+                            <div class="p-4 pt-1 bg-white/50 dark:bg-transparent border-t border-blue-100/50 dark:border-slate-800">
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div>
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Tgl Lahir</p>
+                                        <p class="text-[10px] font-bold text-slate-800 dark:text-slate-200">{{ $targetUser->tanggal_lahir ? \Carbon\Carbon::parse($targetUser->tanggal_lahir)->format('d M Y') : '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Usia</p>
+                                        <p class="text-[10px] font-bold text-slate-800 dark:text-slate-200">{{ $targetUser->tanggal_lahir ? \Carbon\Carbon::parse($targetUser->tanggal_lahir)->age . ' Tahun' : '-' }}</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">NIK</p>
+                                        <p class="text-[10px] font-bold text-slate-800 dark:text-slate-200">{{ maskNikKk($targetUser->nik) }}</p>
+                                    </div>
+                                </div>
+                                <button type="button" @click="editKepalaNik = '{{ $targetUser->nik }}'; editKepalaNoKk = '{{ $targetUser->no_kk }}'; editKepalaTanggalLahir = '{{ $targetUser->tanggal_lahir }}'; showModalEditKepala = true" class="w-full flex justify-center items-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-900/30 p-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                    Edit NIK
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
+                @forelse($members as $anggota)
+                    <div x-data="{ expanded: false }" class="flex flex-col bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all overflow-hidden">
+                        <div @click="expanded = !expanded" class="flex flex-row items-center justify-between p-4 cursor-pointer active:bg-slate-100 dark:active:bg-slate-800/60">
+                            <div class="flex-1 min-w-0 pr-3">
+                                <h4 class="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">{{ $anggota->nama }}</h4>
+                                <span class="text-[9px] font-bold text-slate-500 mt-0.5 block uppercase tracking-widest">{{ $anggota->status_hubungan }}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <svg class="size-4 text-slate-400 transform transition-transform duration-300" :class="{'rotate-180': expanded}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                        <div x-show="expanded" x-collapse x-cloak>
+                            <div class="p-4 pt-1 bg-white dark:bg-transparent border-t border-slate-100 dark:border-slate-800">
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div>
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Tgl Lahir</p>
+                                        <p class="text-[10px] font-bold text-slate-800 dark:text-slate-200">{{ $anggota->tanggal_lahir ? \Carbon\Carbon::parse($anggota->tanggal_lahir)->format('d M Y') : '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Usia</p>
+                                        <p class="text-[10px] font-bold text-slate-800 dark:text-slate-200">{{ $anggota->tanggal_lahir ? \Carbon\Carbon::parse($anggota->tanggal_lahir)->age . ' Tahun' : '-' }}</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">NIK</p>
+                                        <p class="text-[10px] font-bold text-slate-800 dark:text-slate-200">{{ maskNikKk($anggota->nik) }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="button" @click="editUrl = '{{ route('warga.family.update', $anggota->id) }}'; editNama = '{{ addslashes($anggota->nama) }}'; editStatus = '{{ $anggota->status_hubungan }}'; editNik = '{{ $anggota->nik }}'; editKelompokKk = '{{ $anggota->kelompok_kk ?: 'KK Utama' }}'; editNoKk = '{{ $anggota->no_kk_kelompok }}'; editTanggalLahir = '{{ $anggota->tanggal_lahir }}'; showModalEdit = true" class="flex-1 flex justify-center items-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 p-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        Edit
+                                    </button>
+                                    
+                                    <form action="{{ route('warga.family.destroy', $anggota->id) }}" method="POST" class="flex-1" id="delete-mob-{{ $anggota->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" onclick="confirmDeleteAnggotaMob('{{ $anggota->id }}')" class="w-full flex justify-center items-center gap-2 text-rose-600 bg-rose-50 dark:bg-rose-900/20 p-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-4 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Belum ada data anggota keluarga</p>
+                    </div>
+                @endforelse
             </div>
         </div>
         @endforeach
@@ -374,6 +472,24 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         document.getElementById('delete-anggota-' + id).submit();
+                    }
+                })
+            }
+
+            function confirmDeleteAnggotaMob(id) {
+                Swal.fire({
+                    title: 'Hapus Anggota Keluarga?',
+                    text: 'Data anggota keluarga ini akan dihapus secara permanen.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#94a3b8',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-mob-' + id).submit();
                     }
                 })
             }

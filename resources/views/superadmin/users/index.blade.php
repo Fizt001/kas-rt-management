@@ -62,71 +62,73 @@
         </div>
 
         {{-- BAGIAN TABEL --}}
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        <th class="px-6 py-4">Nama Aktor</th>
-                        <th class="px-6 py-4 text-center">Level Akses</th>
-                        <th class="px-6 py-4 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                    @forelse($users as $u)
-                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all group">
-                            <td class="px-6 py-3.5">
-                                <div class="flex flex-col">
-                                    <span class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{{ $u->name }}</span>
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{{ $u->email }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-3.5 text-center">
-                                @php
-                                    $badgeColor = match(strtolower($u->role)) {
-                                        'superadmin' => 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 border-rose-100',
-                                        'rt' => 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400 border-indigo-100',
-                                        'bendahara' => 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 border-amber-100',
-                                        'warga' => 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-100',
-                                        'mesjid' => 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400 border-cyan-100',
-                                        'koperasi' => 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400 border-purple-100',
-                                        default => 'bg-slate-50 text-slate-600 border-slate-100',
-                                    };
-                                @endphp
-                                <span class="px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-tighter border {{ $badgeColor }}">
-                                    {{ $u->role }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-3.5 text-right">
-                                @php
-                                    $isRestricted = in_array(strtolower($u->role), ['superadmin', 'rt', 'bendahara']);
-                                    $canManage = auth()->user()->role === 'superadmin' || !$isRestricted;
-                                @endphp
-                                @if($canManage)
-                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                                        <button type="button" @click="openEditModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ $u->email }}', '{{ $u->role }}')" 
-                                            class="p-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors">
-                                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
-                                        </button>
-                                        <form id="delete-form-{{ $u->id }}" action="{{ route('users.destroy', $u->id) }}" method="POST" class="inline">
-                                            @csrf @method('DELETE')
-                                            <button type="button" @click="confirmDelete('{{ $u->id }}')" 
-                                                class="p-2 text-rose-600 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-100 hover:bg-rose-100 transition-colors">
-                                                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14.74 9l-.34 12m-4.78 0-.34-12m10.32-4.74l-.38 3.42a2 2 0 0 1-1.99 1.74H6.42a2 2 0 0 1-1.99-1.74l-.38-3.42"/></svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                @else
-                                    <div class="flex justify-end opacity-0 group-hover:opacity-100 transition-all duration-200">
-                                        <span class="text-[9px] font-bold text-slate-400 italic px-2 py-1">Protected</span>
-                                    </div>
-                                @endif
-                            </td>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-3xl overflow-hidden shadow-sm flex flex-col">
+            <div class="overflow-x-auto custom-scrollbar flex-1">
+                <table class="w-full text-left border-collapse min-w-[350px]">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-800/50 border-y border-slate-100 dark:border-slate-800 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+                            <th class="px-3 py-2">Nama Aktor</th>
+                            <th class="px-3 py-2 text-center">Level Akses</th>
+                            <th class="px-3 py-2 text-right">Aksi</th>
                         </tr>
-                    @empty
-                        <tr><td colspan="3" class="p-12 text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Data Tidak Ditemukan</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 dark:divide-slate-800">
+                        @forelse($users as $u)
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                                <td class="px-3 py-2">
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate max-w-[120px] sm:max-w-xs">{{ $u->name }}</span>
+                                        <span class="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-tighter truncate max-w-[120px] sm:max-w-xs">{{ $u->email }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    @php
+                                        $badgeColor = match(strtolower($u->role)) {
+                                            'superadmin' => 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 border-rose-100',
+                                            'rt' => 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400 border-indigo-100',
+                                            'bendahara' => 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 border-amber-100',
+                                            'warga' => 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-100',
+                                            'mesjid' => 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400 border-cyan-100',
+                                            'koperasi' => 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400 border-purple-100',
+                                            default => 'bg-slate-50 text-slate-600 border-slate-100',
+                                        };
+                                    @endphp
+                                    <span class="px-2 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-tighter border {{ $badgeColor }}">
+                                        {{ $u->role }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-2 text-right">
+                                    @php
+                                        $isRestricted = in_array(strtolower($u->role), ['superadmin', 'rt', 'bendahara']);
+                                        $canManage = auth()->user()->role === 'superadmin' || !$isRestricted;
+                                    @endphp
+                                    @if($canManage)
+                                        <div class="flex justify-end gap-1.5 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                            <button type="button" @click="openEditModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ $u->email }}', '{{ $u->role }}')" 
+                                                class="p-1.5 sm:p-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors">
+                                                <svg class="size-3.5 sm:size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
+                                            </button>
+                                            <form id="delete-form-{{ $u->id }}" action="{{ route('users.destroy', $u->id) }}" method="POST" class="inline">
+                                                @csrf @method('DELETE')
+                                                <button type="button" @click="confirmDelete('{{ $u->id }}')" 
+                                                    class="p-1.5 sm:p-2 text-rose-600 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-100 hover:bg-rose-100 transition-colors">
+                                                    <svg class="size-3.5 sm:size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14.74 9l-.34 12m-4.78 0-.34-12m10.32-4.74l-.38 3.42a2 2 0 0 1-1.99 1.74H6.42a2 2 0 0 1-1.99-1.74l-.38-3.42"/></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <div class="flex justify-end opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                            <span class="text-[8px] font-bold text-slate-400 italic px-2 py-1">Protected</span>
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="3" class="p-8 text-center text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 dark:bg-slate-800/20">Data Tidak Ditemukan</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
             {{-- FIX: TAMBAHKAN TOMBOL HALAMAN (PAGINATION) DI SINI --}}
             <div class="px-6 py-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">

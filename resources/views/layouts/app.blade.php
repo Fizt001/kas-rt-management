@@ -6,7 +6,7 @@
     <title>{{ config('app.name', 'KAS-RT') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full font-sans antialiased text-slate-900" x-data="{ sidebarOpen: false, sidebarMini: localStorage.getItem('sidebarMini') === 'true' }" x-init="$watch('sidebarMini', val => localStorage.setItem('sidebarMini', val))">
+<body class="h-full font-sans antialiased text-slate-900" x-data="{ sidebarOpen: false, bottomSheetOpen: false, sidebarMini: localStorage.getItem('sidebarMini') === 'true' }" x-init="$watch('sidebarMini', val => localStorage.setItem('sidebarMini', val))">
 
     {{-- Overlay & Mobile Sidebar (Sama seperti sebelumnya) --}}
     <div x-show="sidebarOpen" x-transition.opacity @click="sidebarOpen = false" class="fixed inset-0 z-40 bg-slate-900/80 lg:hidden" x-cloak></div>
@@ -33,7 +33,7 @@
     {{-- KONTEN UTAMA --}}
     <div class="flex flex-col h-screen transition-all duration-300 ease-in-out" :class="sidebarMini ? 'lg:pl-20' : 'lg:pl-64'">
         @include('layouts.navigation')
-        <main class="flex-1 overflow-y-auto bg-slate-50">
+        <main class="flex-1 overflow-y-auto bg-slate-50 pb-20 lg:pb-0">
             <div class="py-8 px-4 sm:px-6 lg:px-8">
                 {{ $slot }}
             </div>
@@ -168,7 +168,8 @@
 
     <!-- Load SweetAlert globally -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    @include('layouts.bottom-nav')
+
     @stack('scripts')
 </body>
 </html>

@@ -13,6 +13,7 @@ use App\Http\Controllers\RtDashboardController;
 use App\Http\Controllers\StatistikWargaController;
 use App\Http\Controllers\BendaharaDashboardController;
 use App\Http\Controllers\WargaDashboardController;
+use App\Http\Controllers\SuperadminDashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,8 +45,9 @@ Route::get('/dashboard', function () {
         return app(WargaDashboardController::class)->index();
     }
             
-
-
+    if ($role === 'superadmin') {
+        return app(SuperadminDashboardController::class)->index();
+    }
     if (view()->exists($role . '.dashboard')) {
         return view($role . '.dashboard');
     }

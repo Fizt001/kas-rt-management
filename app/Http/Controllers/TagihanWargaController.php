@@ -31,11 +31,18 @@ class TagihanWargaController extends Controller
         // Konversi bulan dari view (nama string) ke integer untuk query
         $bulanInt  = $this->parseBulan($request->bulan ?? Carbon::now()->month);
         $tahunIni  = (int) ($request->tahun ?? Carbon::now()->year);
+        $search    = $request->search ?? '';
 
         // $bulanIni dikirim ke view sebagai integer agar dropdown bisa highlight bulan yang aktif
         $bulanIni  = $bulanInt;
 
         $rekap = User::where('role', 'warga')
+            ->when($search, function($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('no_rumah', 'like', "%{$search}%");
+                });
+            })
             ->with(['billings' => function($q) use ($bulanInt, $tahunIni) {
                 $q->where('bulan', $bulanInt)->where('tahun', $tahunIni);
             }])
@@ -49,6 +56,7 @@ class TagihanWargaController extends Controller
                 return [
                     'id'              => $u->id,
                     'nama'            => $u->name,
+                    'blok'            => $u->blok_rumah ?? '-',
                     'no_rumah'        => $u->no_rumah ?? '-', 
                     'status_sekarang' => $billingBulanIni->status ?? 'belum_ada',
                     'total_tunggakan' => $u->total_tunggakan ?? 0,
