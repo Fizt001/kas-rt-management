@@ -6,6 +6,17 @@ Aplikasi Manajemen Lingkungan Terpadu (Iuran & Kegiatan Warga)
 
 ---
 
+## 🖼️ Tampilan Antarmuka (UI)
+<p align="center">
+  <img src="public/images/desktop-view.png" width="100%" style="border-radius:10px; margin-bottom:10px;" alt="Tampilan Desktop KAS-RT">
+</p>
+<p align="center" style="display: flex; justify-content: space-between; gap: 10px;">
+  <img src="public/images/mobile-view-1.png" width="49%" style="border-radius:10px;" alt="Tampilan Mobile 1">
+  <img src="public/images/mobile-view-2.png" width="49%" style="border-radius:10px;" alt="Tampilan Mobile 2">
+</p>
+
+---
+
 ## 🛠️ Tech Stack
 * **Framework:** Laravel (PHP 8.2+)
 * **Frontend UI:** Tailwind CSS, Alpine.js
