@@ -66,7 +66,7 @@
             <div class="overflow-x-auto custom-scrollbar flex-1">
                 <table class="w-full text-left border-collapse min-w-[350px]">
                     <thead>
-                        <tr class="bg-slate-50 dark:bg-slate-800/50 border-y border-slate-100 dark:border-slate-800 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+                        <tr class="bg-slate-50 dark:bg-slate-800/50 border-y border-slate-100 dark:border-slate-800 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
                             <th class="px-3 py-2">Nama Aktor</th>
                             <th class="px-3 py-2 text-center">Level Akses</th>
                             <th class="px-3 py-2 text-right">Aksi</th>
@@ -77,8 +77,8 @@
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                                 <td class="px-3 py-2">
                                     <div class="flex flex-col">
-                                        <span class="text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate max-w-[120px] sm:max-w-xs">{{ $u->name }}</span>
-                                        <span class="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-tighter truncate max-w-[120px] sm:max-w-xs">{{ $u->email }}</span>
+                                        <span class="text-[9px] sm:text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate max-w-[120px] sm:max-w-xs">{{ $u->name }}</span>
+                                        <span class="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tighter truncate max-w-[120px] sm:max-w-xs">{{ $u->email }}</span>
                                     </div>
                                 </td>
                                 <td class="px-3 py-2 text-center">
@@ -93,7 +93,7 @@
                                             default => 'bg-slate-50 text-slate-600 border-slate-100',
                                         };
                                     @endphp
-                                    <span class="px-2 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-tighter border {{ $badgeColor }}">
+                                    <span class="px-2 py-0.5 rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-tighter border {{ $badgeColor }}">
                                         {{ $u->role }}
                                     </span>
                                 </td>
@@ -124,7 +124,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="3" class="p-8 text-center text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 dark:bg-slate-800/20">Data Tidak Ditemukan</td></tr>
+                            <tr><td colspan="3" class="p-8 text-center text-[9px] sm:text-xs font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 dark:bg-slate-800/20">Data Tidak Ditemukan</td></tr>
                         @endforelse
                     </tbody>
                 </table>

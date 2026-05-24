@@ -47,6 +47,17 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="phone" :value="__('Nomor WhatsApp')" />
+            <div class="relative mt-1">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 border-r border-gray-300 pr-3 bg-gray-50 rounded-l-md">
+                    +62
+                </span>
+                <x-text-input id="phone" name="phone" type="text" class="block w-full pl-16" :value="str_starts_with(old('phone', $user->phone) ?? '', '62') ? substr(old('phone', $user->phone), 2) : old('phone', $user->phone)" placeholder="81234567890" />
+            </div>
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

@@ -49,6 +49,9 @@ class TagihanWargaController extends Controller
             ->withSum(['billings as total_tunggakan' => function($q) {
                 $q->whereIn('status', ['belum_lunas', 'pending']);
             }], 'total_amount')
+            ->withCount(['billings as jumlah_bulan_tunggakan' => function($q) {
+                $q->whereIn('status', ['belum_lunas', 'pending']);
+            }])
             ->orderBy('name', 'asc')
             ->paginate(14)
             ->through(function ($u) {
@@ -60,6 +63,7 @@ class TagihanWargaController extends Controller
                     'no_rumah'        => $u->no_rumah ?? '-', 
                     'status_sekarang' => $billingBulanIni->status ?? 'belum_ada',
                     'total_tunggakan' => $u->total_tunggakan ?? 0,
+                    'jumlah_bulan_tunggakan' => $u->jumlah_bulan_tunggakan ?? 0,
                     'wa_phone'        => $u->phone,
                 ];
             });

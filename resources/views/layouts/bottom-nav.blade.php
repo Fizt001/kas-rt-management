@@ -170,7 +170,7 @@
                     </a>
                 @endif
 
-                @if(in_array($role, ['warga', 'superadmin']))
+                @if(in_array($role, ['rt', 'warga', 'superadmin']))
                     <!-- Grup Layanan Warga -->
                     <div class="col-span-4 mt-4 mb-1"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Layanan Pribadi</h3></div>
                     
@@ -197,6 +197,15 @@
                 <!-- Grup Akun -->
                 <div class="col-span-4 mt-4 mb-1"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Akun</h3></div>
                 
+                @if($role !== 'warga')
+                <a href="{{ route('profile.edit') }}" class="col-span-1 flex flex-col items-center gap-2 group">
+                    <div class="size-12 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center group-hover:bg-slate-600 group-hover:text-white transition-colors">
+                        <span class="text-2xl">👤</span>
+                    </div>
+                    <span class="text-[9px] font-bold text-center leading-tight">Profil</span>
+                </a>
+                @endif
+
                 <form method="POST" action="{{ route('logout') }}" class="col-span-1">
                     @csrf
                     <button type="submit" class="flex flex-col items-center gap-2 group w-full">

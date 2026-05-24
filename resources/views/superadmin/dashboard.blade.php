@@ -8,7 +8,7 @@
         </div>
     </x-slot>
 
-    <div class="py-6 px-4 sm:px-6 lg:px-8 max-w-[90rem] mx-auto space-y-6">
+    <div class="p-4 sm:p-6 lg:p-8 max-w-[90rem] mx-auto space-y-6">
         
         <!-- 1. KARTU METRIK UTAMA -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
@@ -67,21 +67,6 @@
             <div class="p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-[1.25rem] sm:rounded-3xl flex flex-col">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-[0.15em]">Distribusi Peran</h2>
-                        <p class="text-xs font-bold text-slate-400 mt-1">Proporsi Akun Terdaftar</p>
-                    </div>
-                </div>
-                <div class="flex-1 flex items-center justify-center">
-                    <div id="chart-superadmin-roledist" class="w-full"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. GRAFIK DEMOGRAFI & STATUS -->
-        <div class="grid lg:grid-cols-3 gap-4 sm:gap-6">
-            <div class="p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-[1.25rem] sm:rounded-3xl flex flex-col">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
                         <h2 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-[0.15em]">Partisipasi Iuran</h2>
                         <p class="text-xs font-bold text-slate-400 mt-1">KK Melunasi Iuran per Bulan</p>
                     </div>
@@ -90,7 +75,11 @@
                     <div id="chart-superadmin-kepatuhan" class="w-full"></div>
                 </div>
             </div>
+        </div>
 
+        <!-- 3. GRAFIK DEMOGRAFI & STATUS -->
+        <div class="grid lg:grid-cols-3 gap-4 sm:gap-6">
+            <!-- A. Status Iuran Bulan Ini -->
             <div class="p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-[1.25rem] sm:rounded-3xl flex flex-col">
                 <div class="flex justify-between items-center mb-6">
                     <div>
@@ -103,15 +92,47 @@
                 </div>
             </div>
 
+            <!-- B. Demografi Warga -->
             <div class="p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-[1.25rem] sm:rounded-3xl flex flex-col">
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-[0.15em]">Demografi Warga</h2>
-                        <p class="text-xs font-bold text-slate-400 mt-1">Berdasarkan Kelompok Umur ({{ $totalJiwa }} Jiwa)</p>
+                        <p class="text-xs font-bold text-slate-400 mt-1">Kelompok Umur ({{ $totalJiwa }} Jiwa)</p>
                     </div>
                 </div>
                 <div class="flex-1 flex items-center justify-center">
                     <div id="chart-superadmin-demografi" class="w-full"></div>
+                </div>
+            </div>
+
+            <!-- C. Agenda Kegiatan -->
+            <div class="p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-[1.25rem] sm:rounded-3xl flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-[0.15em]">Agenda Kegiatan</h2>
+                        <p class="text-xs font-bold text-slate-400 mt-1">Jadwal Terdekat</p>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col gap-3 justify-center">
+                    @forelse($agendaTerdekat as $agenda)
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:-translate-y-0.5">
+                            <div class="size-10 bg-blue-100 text-blue-600 rounded-lg flex flex-col justify-center items-center shrink-0 shadow-sm">
+                                <span class="text-[9px] font-black uppercase leading-none">{{ \Carbon\Carbon::parse($agenda->tanggal)->translatedFormat('M') }}</span>
+                                <span class="text-sm font-black leading-none mt-0.5">{{ \Carbon\Carbon::parse($agenda->tanggal)->format('d') }}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-black text-slate-800 dark:text-slate-200 truncate">{{ $agenda->judul }}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest truncate">{{ $agenda->lokasi }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="flex flex-col items-center justify-center h-full opacity-50 py-6">
+                            <svg class="size-10 text-slate-300 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Belum ada agenda</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -217,20 +238,9 @@
             };
             new ApexCharts(document.querySelector("#chart-superadmin-trenkas"), optTrenKas).render();
 
-            // 2. DISTRIBUSI PERAN (DONUT)
-            var optRole = {
-                series: @json($dataRole),
-                labels: ['Warga', 'RT', 'Bendahara', 'Superadmin'],
-                chart: { type: 'donut', height: isMobile ? 220 : 320, fontFamily: 'Figtree, sans-serif' },
-                colors: ['#0891b2', '#10b981', '#4f46e5', '#3b82f6'],
-                plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { fontSize: '10px', fontWeight: 900 }, value: { fontSize: '24px', fontWeight: 900 } } } } },
-                dataLabels: { enabled: false }, legend: { position: 'bottom', fontSize: '10px', fontWeight: 800 }
-            };
-            new ApexCharts(document.querySelector("#chart-superadmin-roledist"), optRole).render();
-
-            // 3. KEPATUHAN (BAR)
+            // 3. KEPATUHAN (BAR) - Moved to top
             var optKepatuhan = {
-                chart: { type: 'bar', height: isMobile ? 200 : 250, toolbar: { show: false }, fontFamily: 'Figtree, sans-serif' },
+                chart: { type: 'bar', height: isMobile ? 220 : 320, toolbar: { show: false }, fontFamily: 'Figtree, sans-serif' },
                 series: [{ name: 'KK Lunas', data: @json($dataKepatuhan) }],
                 colors: ['#6366f1'],
                 plotOptions: { bar: { borderRadius: 6, columnWidth: '40%', dataLabels: { position: 'top' } } },

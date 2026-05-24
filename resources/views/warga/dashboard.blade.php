@@ -8,7 +8,7 @@
         </div>
     </x-slot>
 
-    <div class="py-6 px-4 sm:px-6 max-w-7xl mx-auto space-y-6">
+    <div class="p-4 sm:p-6 lg:p-8 max-w-[90rem] mx-auto space-y-6">
         
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
             <div class="col-span-2 sm:col-span-1 relative overflow-hidden bg-white dark:bg-slate-900 rounded-[1.25rem] sm:rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm p-4 sm:p-6 flex flex-col justify-between">

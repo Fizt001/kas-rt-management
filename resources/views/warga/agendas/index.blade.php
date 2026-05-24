@@ -8,7 +8,7 @@
         </div>
     </x-slot>
 
-    <div class="px-3 sm:px-5 pb-10 max-w-7xl mx-auto space-y-6">
+    <div class="p-4 sm:p-6 lg:p-8 pb-10 max-w-[90rem] mx-auto space-y-6">
         
         {{-- BAGIAN AGENDA AKTIF / AKAN DATANG --}}
         <div>

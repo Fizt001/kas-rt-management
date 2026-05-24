@@ -76,6 +76,14 @@ class IuranController extends Controller
         $bulanSelected = (int) ($request->bulan ?? Carbon::now()->month);
         $tahunSelected = (int) ($request->tahun ?? Carbon::now()->year);
         
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        // Validasi: Portal pencegah generate tagihan masa depan
+        if ($tahunSelected > $currentYear || ($tahunSelected == $currentYear && $bulanSelected > $currentMonth)) {
+            return back()->with('error', 'Gagal! Tidak dapat membuat tagihan untuk bulan yang belum berjalan (masa depan).');
+        }
+        
         $count = 0;
 
         foreach ($warga as $w) {

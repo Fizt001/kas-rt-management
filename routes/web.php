@@ -58,6 +58,7 @@ Route::get('/dashboard', function () {
 // 3. GRUP AKSES ADMIN (RT, BENDAHARA, & SUPERADMIN)
 Route::middleware(['auth', 'role:rt,bendahara,superadmin'])->group(function () {
     Route::get('/users/template', [UserController::class, 'downloadTemplate'])->name('users.template');
+    Route::get('/users/{id}/print', [UserController::class, 'printDetail'])->name('warga.print');
     Route::post('/users/import', [UserController::class, 'import'])->name('users.import');
     
     Route::resource('users', UserController::class);
@@ -88,8 +89,8 @@ Route::middleware(['auth', 'role:rt,bendahara,superadmin'])->group(function () {
     Route::get('/statistik-warga', [StatistikWargaController::class, 'index'])->name('statistik.warga');
 });
 
-// 4. GRUP AKSES WARGA (Warga & Superadmin)
-Route::middleware(['auth', 'role:warga,superadmin'])->group(function () {  
+// 4. GRUP AKSES WARGA (Bisa diakses oleh semua role)
+Route::middleware(['auth', 'role:warga,superadmin,rt,bendahara'])->group(function () {  
     Route::get('/my-iuran', [IuranController::class, 'wargaIndex'])->name('warga.iuran');
     Route::post('/my-iuran/bayar/{id}', [IuranController::class, 'bayar'])->name('warga.bayar'); 
 

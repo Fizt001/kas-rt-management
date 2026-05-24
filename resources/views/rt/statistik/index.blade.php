@@ -8,7 +8,7 @@
         </div>
     </x-slot>
 
-    <div class="p-4 sm:p-5 max-w-7xl mx-auto space-y-4 md:space-y-6">
+    <div class="p-4 sm:p-6 lg:p-8 max-w-[90rem] mx-auto space-y-4 md:space-y-6">
 
         <!-- Top Metrics -->
         <div class="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-4">
@@ -73,7 +73,7 @@
                 <div class="overflow-x-auto custom-scrollbar flex-1">
                     <table class="w-full text-left border-collapse min-w-[300px]">
                         <thead>
-                            <tr class="bg-slate-50 dark:bg-slate-800/50 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 border-y border-slate-100 dark:border-slate-800">
+                            <tr class="bg-slate-50 dark:bg-slate-800/50 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 border-y border-slate-100 dark:border-slate-800">
                                 <th class="px-3 py-2">Blok/No</th>
                                 <th class="px-3 py-2">Nama Akun</th>
                                 <th class="px-3 py-2 text-center">KK</th>
@@ -84,10 +84,10 @@
                             <template x-for="(rumah, index) in paginatedRows" :key="index">
                                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                                     <td class="px-3 py-2">
-                                        <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black uppercase border border-slate-200 dark:border-slate-700" x-text="rumah.no_rumah"></span>
+                                        <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md text-[9px] sm:text-[11px] font-black uppercase border border-slate-200 dark:border-slate-700" x-text="rumah.no_rumah"></span>
                                     </td>
                                     <td class="px-3 py-2">
-                                        <p class="text-[9px] sm:text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase truncate max-w-[100px] sm:max-w-xs" x-text="rumah.nama_akun"></p>
+                                        <p class="text-[9px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 uppercase truncate max-w-[100px] sm:max-w-xs" x-text="rumah.nama_akun"></p>
                                     </td>
                                     <td class="px-3 py-2 text-center">
                                         <span class="text-[10px] sm:text-xs font-black text-slate-600 dark:text-slate-400" x-text="rumah.jumlah_kk"></span>
@@ -98,7 +98,7 @@
                                 </tr>
                             </template>
                             <tr x-show="filteredRows.length === 0" x-cloak>
-                                <td colspan="4" class="px-3 py-8 text-center text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 dark:bg-slate-800/20">
+                                <td colspan="4" class="px-3 py-8 text-center text-[9px] sm:text-xs font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 dark:bg-slate-800/20">
                                     Pencarian tidak ditemukan
                                 </td>
                             </tr>

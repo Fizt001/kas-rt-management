@@ -229,26 +229,33 @@ class UserController extends Controller
             'no_kk'          => 'nullable|string|max:30',
             'nik'            => 'nullable|string|max:30',
             'tanggal_lahir'  => 'nullable|date',
+            'phone'          => 'nullable|string|max:20',
         ]);
 
-        // Hilangkan spasi agar formatnya benar-benar standar (misal "E 1" jadi "E1")
-        $blokRumah = str_replace(' ', '', strtoupper($request->blok_rumah));
-        $noRumah = str_replace(' ', '', strtoupper($request->no_rumah));
+        $updateData = [];
 
-        // Validasi Unique Kombinasi Blok + No Rumah
-        if ($blokRumah && $noRumah) {
-            $existingUser = User::where('blok_rumah', $blokRumah)
-                                ->where('no_rumah', $noRumah)
+        // Proses Blok dan No Rumah
+        if ($request->has('blok_rumah')) {
+            $updateData['blok_rumah'] = str_replace(' ', '', strtoupper($request->blok_rumah));
+        }
+        if ($request->has('no_rumah')) {
+            $updateData['no_rumah'] = str_replace(' ', '', strtoupper($request->no_rumah));
+        }
+
+        // Validasi Unique Kombinasi Blok + No Rumah jika keduanya diubah/dikirim
+        if (isset($updateData['blok_rumah']) && isset($updateData['no_rumah']) && $updateData['blok_rumah'] && $updateData['no_rumah']) {
+            $existingUser = User::where('blok_rumah', $updateData['blok_rumah'])
+                                ->where('no_rumah', $updateData['no_rumah'])
                                 ->where('id', '!=', $request->target_user_id)
                                 ->where('role', 'warga')
                                 ->first();
             
             if ($existingUser) {
-                return back()->with('error', "Gagal! Rumah dengan Blok {$blokRumah} / No. {$noRumah} sudah diklaim oleh warga lain.");
+                return back()->with('error', "Gagal! Rumah dengan Blok {$updateData['blok_rumah']} / No. {$updateData['no_rumah']} sudah diklaim oleh warga lain.");
             }
         }
 
-        // 2. Cek Otorisasi: warga hanya boleh update profil dirinya sendiri
+        // 2. Cek Otorisasi
         $targetId = $request->target_user_id;
         if ($targetId != auth()->id() && !in_array(auth()->user()->role, ['superadmin', 'rt'])) {
             abort(403, 'Anda tidak diizinkan mengubah data warga lain.');
@@ -257,15 +264,58 @@ class UserController extends Controller
         // 3. Ambil User target
         $user = User::findOrFail($targetId);
 
-        // 4. Update data ke tabel USERS
-        $user->update([
-            'blok_rumah' => $blokRumah,
-            'no_rumah' => $noRumah,
-            'no_kk'    => $request->no_kk,
-            'nik'      => $request->nik,
-            'tanggal_lahir' => $request->tanggal_lahir,
-        ]);
+        // Kumpulkan field lain yang dikirim
+        if ($request->has('no_kk')) {
+            $updateData['no_kk'] = $request->no_kk;
+        }
+        if ($request->has('nik')) {
+            $updateData['nik'] = $request->nik;
+        }
+        if ($request->has('tanggal_lahir')) {
+            $updateData['tanggal_lahir'] = $request->tanggal_lahir;
+        }
+
+        // 4. Proses Phone jika ada
+        if ($request->has('phone')) {
+            $phone = $request->phone;
+            if ($phone) {
+                $phone = preg_replace('/[^0-9]/', '', $phone);
+                if (str_starts_with($phone, '0')) {
+                    $phone = '62' . substr($phone, 1);
+                } elseif (!str_starts_with($phone, '62')) {
+                    $phone = '62' . $phone;
+                }
+            }
+            $updateData['phone'] = $phone;
+        }
+
+        // 5. Update data ke tabel USERS
+        if (!empty($updateData)) {
+            $user->update($updateData);
+        }
 
         return back()->with('success', 'Data Identitas Keluarga Berhasil Diperbarui!');
+    }
+
+    public function printDetail($id)
+    {
+        $targetUser = User::with('familyMembers')->findOrFail($id);
+
+        if ($targetUser->role !== 'warga') {
+            abort(404);
+        }
+
+        $groupedMembers = $targetUser->familyMembers->groupBy(function($item) {
+            return $item->kelompok_kk ?: 'KK Utama';
+        });
+
+        if (!$groupedMembers->has('KK Utama')) {
+            $groupedMembers->put('KK Utama', collect());
+        }
+        
+        $utama = $groupedMembers->pull('KK Utama');
+        $groupedMembers->prepend($utama, 'KK Utama');
+
+        return view('warga.print', compact('targetUser', 'groupedMembers'));
     }
 }

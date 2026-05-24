@@ -34,7 +34,7 @@
     <div class="flex flex-col h-screen transition-all duration-300 ease-in-out" :class="sidebarMini ? 'lg:pl-20' : 'lg:pl-64'">
         @include('layouts.navigation')
         <main class="flex-1 overflow-y-auto bg-slate-50 pb-20 lg:pb-0">
-            <div class="py-8 px-4 sm:px-6 lg:px-8">
+            <div class="w-full">
                 {{ $slot }}
             </div>
         </main>

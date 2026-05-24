@@ -8,7 +8,7 @@
         </div>
     </x-slot>
 
-    <div class="p-4 sm:p-5 max-w-7xl mx-auto space-y-4 md:space-y-5">
+    <div class="p-4 sm:p-6 lg:p-8 max-w-[90rem] mx-auto space-y-4 md:space-y-5">
         
         <!-- FILTER TAHUN -->
         <div class="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">

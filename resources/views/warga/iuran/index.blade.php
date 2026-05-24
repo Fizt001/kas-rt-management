@@ -21,7 +21,7 @@
             this.tagihanNominal = 'Rp ' + new Intl.NumberFormat('id-ID').format(nominal);
             this.showModalBayar = true;
         }
-    }" class="p-4 sm:p-5 max-w-7xl mx-auto space-y-4 md:space-y-5">
+    }" class="p-4 sm:p-6 lg:p-8 max-w-[90rem] mx-auto space-y-4 md:space-y-5">
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             @forelse($masters as $index => $m)

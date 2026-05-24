@@ -63,7 +63,7 @@
 
 
                     {{-- ================= LAYANAN WARGA ================= --}}
-                    @if(in_array($role, ['warga', 'superadmin']))
+                    @if(in_array($role, ['rt', 'warga', 'superadmin']))
                         <li class="pt-6 pb-1 font-bold text-[10px] text-slate-500 uppercase tracking-widest border-t border-slate-200 mt-4" :class="sidebarMini ? 'text-center pl-0' : 'pl-4'"><span x-show="!sidebarMini">Layanan Warga</span><span x-show="sidebarMini">...</span></li>
                         <li><a href="{{ route('warga.profile') }}" :title="sidebarMini ? 'Data Keluarga' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('warga.profile') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">👨‍👩‍👧‍👦</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Data Keluarga</span></a></li>
                         <li><a href="{{ route('warga.iuran') }}" :title="sidebarMini ? 'Iuran & Bayar' : ''" class="group flex items-center py-2 px-4 text-sm font-medium rounded-xl transition-all {{ active('warga.iuran') }}" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'"><span class="text-xl shrink-0">💵</span> <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Iuran & Bayar</span></a></li>
@@ -76,11 +76,19 @@
 
 {{-- BAGIAN 3: FOOTER LOGOUT (Tetap di Bawah) --}}
 <div class="p-4 border-t border-blue-100 bg-blue-50/60 shrink-0 transition-all duration-300">
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" :title="sidebarMini ? 'Keluar Aplikasi' : ''" class="group flex items-center rounded-xl p-3 text-sm font-bold text-rose-400 hover:bg-rose-500/10 w-full text-left transition-all shadow-sm" :class="sidebarMini ? 'justify-center px-0' : 'gap-x-3'">
-            <span class="text-xl shrink-0">🚪</span> 
-            <span x-show="!sidebarMini" class="whitespace-nowrap transition-all">Keluar Aplikasi</span>
-        </button>
-    </form>
+    <div class="flex gap-2" :class="sidebarMini ? 'flex-col' : 'flex-row'">
+        @if($role !== 'warga')
+        <a href="{{ route('profile.edit') }}" :title="sidebarMini ? 'Pengaturan Akun' : ''" class="flex-1 group flex items-center justify-center rounded-xl p-3 text-sm font-bold text-slate-600 hover:bg-slate-200 hover:text-blue-700 transition-all {{ active('profile.edit') }}">
+            <span class="text-xl">👤</span> 
+            <span x-show="!sidebarMini" class="ml-2 whitespace-nowrap transition-all">Profil</span>
+        </a>
+        @endif
+        <form method="POST" action="{{ route('logout') }}" class="flex-1 flex">
+            @csrf
+            <button type="submit" :title="sidebarMini ? 'Keluar Aplikasi' : ''" class="flex-1 group flex items-center justify-center rounded-xl p-3 text-sm font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-rose-200 hover:border-transparent bg-white shadow-sm">
+                <span class="text-xl">🚪</span> 
+                <span x-show="!sidebarMini" class="ml-2 whitespace-nowrap transition-all">Keluar</span>
+            </button>
+        </form>
+    </div>
 </div>
